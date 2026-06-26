@@ -1,0 +1,163 @@
+---
+alwaysApply: true
+---
+
+Laravel API Code Generation Guidelines
+When generating Laravel API code for this project, follow these conventions and patterns:
+File Structure & Naming Conventions
+Base Classes
+• BaseModel: app/Models/BaseModel.php - Abstract base class for all models
+• BaseFormRequest: app/Http/Requests/BaseFormRequest.php - Base class for all form requests
+Controllers
+• Location: app/Http/Controllers/Api
+• Naming: {Resource}Controller.php (e.g., TaskController.php)
+• Class name: {Resource}Controller (PascalCase)
+Form Requests
+• Location: app/Http/Requests/{Resource}/
+• Naming: {Resource}{Method}Request.php (e.g., TaskPostRequest.php, TaskPutRequest.php)
+• Class name: {Resource}{Method}Request
+• Must extend: App\Http\Requests\BaseFormRequest
+Services
+• Location: app/Services/{Resource}/
+• Naming: {Action}{Resource}.php (e.g., CreateTask.php, UpdateTask.php)
+• Class name: {Action}{Resource} (PascalCase, verb + noun)
+• Single method: handle() that takes data and returns the model
+Models
+• Location: app/Models/
+• Naming: {Resource}.php (singular, PascalCase)
+• Class name: {Resource} (singular)
+• Must extend: App\Models\BaseModel
+API Resources
+• Location: app/Http/Resources/
+• Naming: {Resource}Resource.php (e.g., TaskResource.php)
+• Class name: {Resource}Resource
+Enums
+• Location: app/Enums/Models/
+• Naming: {Resource}ModelEnum.php (e.g., TaskModelEnum.php)
+• Class name: {Resource}ModelEnum
+• Type: Backed enum with string values
+Migrations
+• Use enum constants for all field names (never hardcode strings)
+Coding Style
+Naming Conventions
+• Classes: PascalCase (e.g., TaskController, CreateTask, BaseModel)
+• Methods: camelCase (e.g., handle(), authorize(), rules(), modelEnum())
+• Variables: camelCase (e.g., $task, $tasks, $data, $mappedData)
+• Enum cases: SCREAMING_SNAKE_CASE (e.g., TABLE_NAME, IS_COMPLETED, CREATED_AT)
+• Database fields: snake_case (e.g., is_completed, created_at)
+• API response fields: camelCase (e.g., isCompleted, createdAt)
+Code Organization
+• Use dependency injection in controllers for services
+• Keep controllers thin - delegate business logic to services
+• Services are single-action classes with one handle() method
+• All string literals (field names, table names) must come from enums
+Architecture Patterns
+BaseModel Pattern (Required)
+All models must extend App\Models\BaseModel which:
+• Extends Eloquent's Model class
+• Requires child classes to implement modelEnum() method
+• Automatically sets table and fillable properties from the enum in the constructor
+Enum Pattern (Required)
+Every model must have a corresponding enum in app/Enums/Models/{Resource}ModelEnum.php with:
+1. Enum cases for:
+• TABLE_NAME - table name
+• Field names (e.g., TITLE, DESCRIPTION, IS_COMPLETED, CREATED_AT, UPDATED_AT)
+• Client field names if different (e.g., CLIENT_IS_COMPLETED = 'isCompleted')
+2. Static methods for each field:
+   public static function title(): string
+   {
+       return self::TITLE->value;
+   }
+3. Helper methods:
+• tableName(): string - returns table name
+• fillable(): array - returns array of fillable fields
+• fieldMapping(): array - returns mapping from client field names to backend field names
+Model Pattern
+Models must extend BaseModel and implement modelEnum():
+class {Resource} extends BaseModel
+{
+    /**
+     * Get the model enum class name.
+     * 
+     * @return string
+     */
+    protected static function modelEnum(): string
+    {
+        return {Resource}ModelEnum::class;
+    }
+}
+Important: Models should NOT have their own constructor. The BaseModel constructor handles setting table and fillable from the enum automatically.
+Form Request Pattern
+1. Extend App\Http\Requests\BaseFormRequest
+2. Use enum methods in rules() method (never hardcode field names):
+   return [
+       {Resource}ModelEnum::title() => 'required|string|max:255',
+   ];
+3. Implement fieldMapping() method that returns {Resource}ModelEnum::fieldMapping()
+4. Include messages() method using enum methods for custom validation messages:
+   public function messages(): array
+   {
+       return [
+           {Resource}ModelEnum::title() . '.required' => 'Title is required.',
+       ];
+   }
+Service Pattern
+Services are single-action classes:
+class Create{Resource}
+{
+    public function handle(array $data): {Resource} {
+        ${resource} = {Resource}::create($data);
+        return ${resource};
+    }
+}
+Controller Pattern
+Controllers are thin and use dependency injection:
+public function store({Resource}PostRequest $request, Create{Resource} $create{Resource})
+{
+    ${resource} = $create{Resource}->handle($request->validated());
+    return new {Resource}Resource(${resource});
+}
+For delete operations, return response()->noContent().
+API Resource Pattern
+Use enum methods to get attributes, return camelCase for client:
+public function toArray(Request $request): array
+{
+    return [
+        'id' => $this->id,
+        'title' => $this->getAttribute({Resource}ModelEnum::title()),
+        'isCompleted' => $this->getAttribute({Resource}ModelEnum::isCompleted()),
+        'createdAt' => $this->getAttribute({Resource}ModelEnum::createdAt()),
+        'updatedAt' => $this->getAttribute({Resource}ModelEnum::updatedAt()),
+    ];
+}
+Migration Pattern
+Use enum constants for all field names:
+Schema::create({Resource}ModelEnum::tableName(), function (Blueprint $table) {
+    $table->id();
+    $table->string({Resource}ModelEnum::title());
+    $table->boolean({Resource}ModelEnum::isCompleted())->nullable()->default(false);
+    $table->timestamps();
+});
+Routes
+• Use Route::apiResource() for RESTful resources
+• Routes file: routes/api.php
+Key Principles
+1. No hardcoded strings - all field names, table names must come from enums
+2. BaseModel required - all models must extend BaseModel, not Model directly
+3. Separation of concerns - controllers delegate to services
+4. Single responsibility - services are single-action classes
+5. Consistency - use enum methods everywhere
+6. Type safety - use proper type hints and return types
+7. API responses - use camelCase for client-facing fields
+8. Database fields - use snake_case in database and backend code
+Example Flow
+When creating a new resource module:
+1. Create enum with all field definitions and helper methods
+2. Create migration using enum constants
+3. Create model extending BaseModel (not Model) with modelEnum() method
+4. Create form requests (Post/Put) extending BaseFormRequest with enum-based rules
+5. Create services (Create/Update) with handle() method
+6. Create API resource using enum methods, returning camelCase
+7. Create controller with dependency injection
+8. Add route using apiResource
+Critical: Always ensure models extend BaseModel and implement the modelEnum() method. Never create models that extend Model directly or have their own constructor that sets table/fillable.Always follow these patterns exactly. Never deviate from the enum-based approach, BaseModel pattern, or hardcode string literals.
