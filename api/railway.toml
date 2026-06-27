@@ -2,11 +2,12 @@
 # and Config File path to `/api/railway.toml` in service settings).
 
 [build]
-buildCommand = "npm ci && npm run build"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 watchPatterns = ["/api/**"]
 
 [deploy]
-preDeployCommand = ["chmod +x ./railway/init-app.sh && sh ./railway/init-app.sh"]
+preDeployCommand = ["sh ./railway/init-app.sh"]
 healthcheckPath = "/up"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"

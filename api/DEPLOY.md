@@ -25,7 +25,7 @@ Open the API service **Settings**:
 | **Root Directory** | `api` |
 | **Config File** | `/api/railway.toml` |
 
-Railway auto-detects Laravel and serves the app with PHP-FPM and Caddy. The config file adds asset builds, migrations, and caching.
+The app is built from `api/Dockerfile`, which installs required PHP extensions (`intl`, `zip`, `pdo_pgsql`, etc.), runs Composer and npm builds, and starts Laravel via `php artisan serve`.
 
 ### Generate a public URL
 
@@ -55,10 +55,9 @@ Replace `Postgres` in `DB_URL` with your Postgres service name if you renamed it
 
 Click **Deploy**. On each deploy, Railway will:
 
-1. Install PHP and Node dependencies
-2. Run `npm run build` (Vite assets)
-3. Run migrations and cache config/routes/views (via `railway/init-app.sh`)
-4. Start the web server
+1. Build the Docker image (`composer install`, `npm run build`)
+2. Run migrations and cache config/routes/views (via `railway/init-app.sh`)
+3. Start the web server (`railway/start.sh`)
 
 Health checks use Laravel’s `/up` endpoint.
 
