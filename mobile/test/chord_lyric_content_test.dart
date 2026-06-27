@@ -40,4 +40,24 @@ void main() {
     expect(find.textContaining('G'), findsOneWidget);
     expect(find.textContaining('C'), findsOneWidget);
   });
+
+  testWidgets('renders chord-only lines without a lyric row', (tester) async {
+    const content = '[G][Am][D]';
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ChordLyricContent(
+            content: content,
+            showChords: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.textContaining('G'), findsOneWidget);
+    expect(find.textContaining('Am'), findsOneWidget);
+    expect(find.textContaining('D'), findsOneWidget);
+    expect(find.text(''), findsNothing);
+  });
 }

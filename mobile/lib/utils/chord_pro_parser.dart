@@ -66,6 +66,23 @@ class ChordProParser {
   static final _chordPattern = RegExp(r'\[([^\]]+)\]');
   static final _directivePattern = RegExp(r'^\{([^}:]+)(?::\s*(.*))?\}\s*$');
 
+  static const _sectionKeywords = [
+    'verse',
+    'chorus',
+    'bridge',
+    'intro',
+    'outro',
+    'pre-chorus',
+    'prechorus',
+    'interlude',
+    'tag',
+    'coda',
+    'ending',
+    'instrumental',
+    'solo',
+    'break',
+  ];
+
   static const _directiveAliases = {
     'sov': 'start_of_verse',
     'eov': 'end_of_verse',
@@ -203,7 +220,10 @@ class ChordProParser {
     lyricsBuffer.write(line.substring(lastEnd));
     final lyrics = lyricsBuffer.toString();
 
-    if (chords.length == 1 && lyrics.isEmpty && chords.first.position == 0) {
+    if (chords.length == 1 &&
+        lyrics.trim().isEmpty &&
+        chords.first.position == 0 &&
+        _looksLikeSectionLabel(chords.first.chord)) {
       return ChordLyricLine.section(chords.first.chord);
     }
 
@@ -213,14 +233,34 @@ class ChordProParser {
     );
   }
 
+  static bool _looksLikeSectionLabel(String text) {
+    if (text.contains(' ')) {
+      return true;
+    }
+
+    final lower = text.toLowerCase();
+    return _sectionKeywords.any(lower.contains);
+  }
+
   static String buildChordLine(ChordLyricLine line) {
     if (line.chords.isEmpty) {
       return '';
     }
 
-    var length = line.lyrics.length;
+    final placedChords = <({int position, String chord})>[];
+    var nextAvailable = 0;
+
     for (final chord in line.chords) {
-      final end = chord.position + chord.chord.length;
+      final position = chord.position > nextAvailable
+          ? chord.position
+          : nextAvailable;
+      placedChords.add((position: position, chord: chord.chord));
+      nextAvailable = position + chord.chord.length + 1;
+    }
+
+    var length = line.lyrics.length;
+    for (final placed in placedChords) {
+      final end = placed.position + placed.chord.length;
       if (end > length) {
         length = end;
       }
@@ -228,11 +268,11 @@ class ChordProParser {
 
     final buffer = List.filled(length, ' ');
 
-    for (final chord in line.chords) {
-      for (var i = 0; i < chord.chord.length; i++) {
-        final index = chord.position + i;
+    for (final placed in placedChords) {
+      for (var i = 0; i < placed.chord.length; i++) {
+        final index = placed.position + i;
         if (index < buffer.length) {
-          buffer[index] = chord.chord[i];
+          buffer[index] = placed.chord[i];
         }
       }
     }

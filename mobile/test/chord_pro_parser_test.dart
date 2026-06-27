@@ -71,5 +71,34 @@ void main() {
       expect(lines[1].displaySectionLabel, 'Chorus');
       expect(lines[2].displaySectionLabel, 'Bridge');
     });
+
+    test('treats a single chord on its own line as chord-only', () {
+      final lines = ChordProParser.parse('[G]');
+
+      expect(lines.first.isSectionHeader, isFalse);
+      expect(lines.first.hasChords, isTrue);
+      expect(lines.first.lyrics, isEmpty);
+      expect(lines.first.chords.first.chord, 'G');
+      expect(ChordProParser.buildChordLine(lines.first), 'G');
+    });
+
+    test('parses chord-only lines with adjacent chords', () {
+      final lines = ChordProParser.parse('[G][Am][D]');
+
+      expect(lines.first.isSectionHeader, isFalse);
+      expect(lines.first.lyrics, isEmpty);
+      expect(lines.first.chords, hasLength(3));
+
+      final chordLine = ChordProParser.buildChordLine(lines.first);
+      expect(chordLine, 'G Am D');
+    });
+
+    test('avoids overlapping chords when names are wider than lyric gaps', () {
+      final lines = ChordProParser.parse('[Gmaj7]a[Am7]word');
+
+      final chordLine = ChordProParser.buildChordLine(lines.first);
+      expect(chordLine.indexOf('Gmaj7'), 0);
+      expect(chordLine.indexOf('Am7'), greaterThan(chordLine.indexOf('Gmaj7') + 4));
+    });
   });
 }

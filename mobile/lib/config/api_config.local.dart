@@ -10,4 +10,4 @@
 ///   php artisan serve --host=0.0.0.0 --port=8000
 ///
 /// Leave as null when using the iOS Simulator or Android Emulator.
-const String? localApiBaseUrl = 'http://192.168.254.104:8000';
+const String? localApiBaseUrl = 'http://192.168.254.119:8000';
