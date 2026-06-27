@@ -21,6 +21,8 @@ class SongPostRequest extends BaseFormRequest
             SongModelEnum::title() => 'required|string|max:255',
             SongModelEnum::artist() => 'nullable|string|max:255',
             SongModelEnum::key() => 'nullable|string|max:10',
+            SongModelEnum::capo() => 'nullable|integer|min:0|max:11',
+            SongModelEnum::keyboardTranspose() => 'nullable|integer|min:-11|max:11',
             SongModelEnum::content() => 'required|string',
         ];
     }

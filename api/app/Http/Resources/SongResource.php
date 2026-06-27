@@ -18,6 +18,8 @@ class SongResource extends JsonResource
             'title' => $this->getAttribute(SongModelEnum::title()),
             'artist' => $this->getAttribute(SongModelEnum::artist()),
             'key' => $this->getAttribute(SongModelEnum::key()),
+            'capo' => $this->getAttribute(SongModelEnum::capo()),
+            'keyboardTranspose' => $this->getAttribute(SongModelEnum::keyboardTranspose()),
             'content' => $this->getAttribute(SongModelEnum::content()),
             'createdAt' => $this->getAttribute(SongModelEnum::createdAt()),
             'updatedAt' => $this->getAttribute(SongModelEnum::updatedAt()),

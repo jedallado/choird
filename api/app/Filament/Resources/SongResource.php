@@ -41,6 +41,18 @@ class SongResource extends Resource
                     ->label('Key')
                     ->maxLength(10)
                     ->placeholder('G'),
+                TextInput::make(SongModelEnum::capo())
+                    ->label('Capo')
+                    ->numeric()
+                    ->minValue(0)
+                    ->maxValue(11)
+                    ->placeholder('0–11'),
+                TextInput::make(SongModelEnum::keyboardTranspose())
+                    ->label('Keyboard transpose')
+                    ->numeric()
+                    ->minValue(-11)
+                    ->maxValue(11)
+                    ->helperText('Semitones from chart key. +2 = up a whole step.'),
                 Textarea::make(SongModelEnum::content())
                     ->required()
                     ->rows(20)
@@ -61,6 +73,12 @@ class SongResource extends Resource
                     ->sortable(),
                 TextColumn::make(SongModelEnum::key())
                     ->label('Key')
+                    ->sortable(),
+                TextColumn::make(SongModelEnum::capo())
+                    ->label('Capo')
+                    ->sortable(),
+                TextColumn::make(SongModelEnum::keyboardTranspose())
+                    ->label('Keyboard')
                     ->sortable(),
                 TextColumn::make(SongModelEnum::updatedAt())
                     ->label('Updated')
