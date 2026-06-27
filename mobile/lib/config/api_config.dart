@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 import 'api_config.local.dart';
 
 class ApiConfig {
-  static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static const String _productionBaseUrl =
+      'https://choird-production.up.railway.app';
 
   static String get baseUrl {
-    if (_envBaseUrl.isNotEmpty) {
-      return _envBaseUrl;
+    if (kReleaseMode) {
+      return _productionBaseUrl;
     }
 
     if (localApiBaseUrl != null && localApiBaseUrl!.isNotEmpty) {
