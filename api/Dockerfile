@@ -9,10 +9,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     libicu-dev \
     libpq-dev \
+    default-libmysqlclient-dev \
     && docker-php-ext-install -j"$(nproc)" \
         intl \
         zip \
         pdo \
+        pdo_mysql \
         pdo_pgsql \
         bcmath \
         pcntl \

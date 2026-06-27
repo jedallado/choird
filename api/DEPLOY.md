@@ -11,9 +11,9 @@ Ensure this repository is pushed to GitHub (Railway deploys from your connected 
 1. Go to [railway.com](https://railway.com) and create a **New Project**.
 2. Choose **Deploy from GitHub repo** and select this repository.
 
-## 3. Add PostgreSQL
+## 3. Add a database
 
-1. On the project canvas, click **+ New** → **Database** → **PostgreSQL**.
+1. On the project canvas, click **+ New** → **Database** → **MySQL** or **PostgreSQL**.
 2. Wait for the database service to finish provisioning.
 
 ## 4. Configure the API service
@@ -43,13 +43,13 @@ In the API service **Variables** tab, add:
 | `APP_URL` | `https://${{RAILWAY_PUBLIC_DOMAIN}}` |
 | `LOG_CHANNEL` | `stderr` |
 | `LOG_STDERR_FORMATTER` | `\Monolog\Formatter\JsonFormatter` |
-| `DB_CONNECTION` | `pgsql` |
-| `DB_URL` | `${{Postgres.DATABASE_URL}}` |
+| `DB_CONNECTION` | `mysql` or `pgsql` (match your database service) |
+| `DB_URL` | `${{MySQL.DATABASE_URL}}` or `${{Postgres.DATABASE_URL}}` |
 | `SESSION_DRIVER` | `database` |
 | `CACHE_STORE` | `database` |
 | `QUEUE_CONNECTION` | `database` |
 
-Replace `Postgres` in `DB_URL` with your Postgres service name if you renamed it.
+Replace `MySQL` / `Postgres` in `DB_URL` with your database service name if you renamed it.
 
 ## 6. Deploy
 
