@@ -24,17 +24,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
-    COMPOSER_NO_INTERACTION=1
+    COMPOSER_NO_INTERACTION=1 \
+    COMPOSER_MAX_PARALLEL_HTTP=5
 
 FROM base AS vendor
 
 WORKDIR /app
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-scripts --no-autoloader
+RUN composer install --no-dev --prefer-install=auto --no-scripts --no-autoloader \
+    || (sleep 5 && composer install --no-dev --prefer-install=auto --no-scripts --no-autoloader)
 
 COPY . .
-RUN composer install --no-dev --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --prefer-install=auto --optimize-autoloader \
+    || (sleep 5 && composer install --no-dev --prefer-install=auto --optimize-autoloader)
 
 FROM node:20-bookworm AS assets
 
