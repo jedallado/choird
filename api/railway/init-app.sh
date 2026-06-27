@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+php artisan migrate --force
+php artisan storage:link --force 2>/dev/null || php artisan storage:link || true
+
+php artisan optimize:clear
+php artisan config:cache
+php artisan event:cache
+php artisan route:cache
+php artisan view:cache
