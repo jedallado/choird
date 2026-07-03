@@ -21,4 +21,22 @@ abstract final class AppTypography {
     color: AppColors.chords,
     fontWeight: FontWeight.w500,
   );
+
+  static const _sectionHeaderScale = 0.875;
+
+  static TextStyle chordLyricLyricStyleAt(double fontSize) {
+    return chordLyricLyricStyle.copyWith(fontSize: fontSize);
+  }
+
+  static TextStyle chordLyricChordStyleAt(double fontSize) {
+    return chordLyricChordStyle.copyWith(fontSize: fontSize);
+  }
+
+  static TextStyle chordLyricSectionStyleAt(double fontSize) {
+    return TextStyle(
+      fontSize: fontSize * _sectionHeaderScale,
+      fontWeight: FontWeight.bold,
+      color: AppColors.accent,
+    );
+  }
 }

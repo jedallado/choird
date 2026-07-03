@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../utils/chord_pro_parser.dart';
 import 'chord_lyric_line_row.dart';
@@ -10,22 +9,19 @@ class ChordLyricContent extends StatelessWidget {
     super.key,
     required this.content,
     this.showChords = true,
+    this.fontSize = AppTypography.chordLyricFontSize,
   });
 
   final String content;
   final bool showChords;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
     final lines = ChordProParser.parse(content);
     final textScaler = MediaQuery.textScalerOf(context);
-    const lyricStyle = AppTypography.chordLyricLyricStyle;
-
-    const sectionStyle = TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.bold,
-      color: AppColors.accent,
-    );
+    final lyricStyle = AppTypography.chordLyricLyricStyleAt(fontSize);
+    final sectionStyle = AppTypography.chordLyricSectionStyleAt(fontSize);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,6 +44,7 @@ class ChordLyricContent extends StatelessWidget {
             ChordLyricLineRow(
               line: line,
               showChords: showChords,
+              fontSize: fontSize,
             ),
         ],
       ],

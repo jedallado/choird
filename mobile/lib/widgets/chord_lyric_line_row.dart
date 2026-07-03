@@ -9,16 +9,18 @@ class ChordLyricLineRow extends StatelessWidget {
     super.key,
     required this.line,
     required this.showChords,
+    this.fontSize = AppTypography.chordLyricFontSize,
   });
 
   final ChordLyricLine line;
   final bool showChords;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
     final textScaler = MediaQuery.textScalerOf(context);
-    const lyricStyle = AppTypography.chordLyricLyricStyle;
-    const chordStyle = AppTypography.chordLyricChordStyle;
+    final lyricStyle = AppTypography.chordLyricLyricStyleAt(fontSize);
+    final chordStyle = AppTypography.chordLyricChordStyleAt(fontSize);
 
     final placements = ChordLyricLayout.computePlacements(
       lyrics: line.lyrics,
