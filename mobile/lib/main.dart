@@ -4,6 +4,7 @@ import 'screens/main_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const ChoirdApp());
 }
 
