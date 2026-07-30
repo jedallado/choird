@@ -25,6 +25,20 @@ class SongRepository {
     return _syncPreferences.getLastSyncedAt();
   }
 
+  /// Returns the song with the given [id], preferring the local cache so it
+  /// works offline. Falls back to the API when not cached yet, then caches
+  /// the result for subsequent offline access.
+  Future<Song> getSong(int id) async {
+    final local = await _localStore.getSongById(id);
+    if (local != null) {
+      return local;
+    }
+
+    final song = await _api.fetchSong(id);
+    await _localStore.upsertSongs([song]);
+    return song;
+  }
+
   /// Downloads the full catalog, replaces the local cache, and returns it.
   Future<List<Song>> syncSongs() async {
     final songs = await _api.fetchSongs();

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/set_list.dart';
 import '../../models/song.dart';
-import '../../services/song_api.dart';
+import '../../services/song_repository.dart';
 import '../songs/song_detail_screen.dart';
 
 class SetSongModal extends StatefulWidget {
@@ -10,17 +10,20 @@ class SetSongModal extends StatefulWidget {
     super.key,
     required this.setSongs,
     required this.initialIndex,
-  });
+    SongRepository? repository,
+  }) : _repository = repository;
 
   final List<SetSongItem> setSongs;
   final int initialIndex;
+  final SongRepository? _repository;
 
   @override
   State<SetSongModal> createState() => _SetSongModalState();
 }
 
 class _SetSongModalState extends State<SetSongModal> {
-  final SongApi _songApi = SongApi();
+  late final SongRepository _repository =
+      widget._repository ?? SongRepository();
   final Map<int, Song> _songCache = {};
 
   late int _currentIndex;
@@ -40,7 +43,7 @@ class _SetSongModalState extends State<SetSongModal> {
       return cachedSong;
     }
 
-    final song = await _songApi.fetchSong(songId);
+    final song = await _repository.getSong(songId);
     _songCache[songId] = song;
     return song;
   }

@@ -16,6 +16,14 @@ class SongLocalStore {
     return rows.map(_songFromRow).toList();
   }
 
+  Future<Song?> getSongById(int id) async {
+    final row = await (_database.select(
+      _database.songs,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+
+    return row == null ? null : _songFromRow(row);
+  }
+
   Future<void> replaceAll(List<Song> songs) async {
     await _database.transaction(() async {
       await _database.delete(_database.songs).go();
@@ -25,6 +33,23 @@ class SongLocalStore {
           songs.map(_companionFromSong).toList(),
         );
       });
+    });
+  }
+
+  /// Inserts or updates the given songs without touching the rest of the
+  /// local catalog. Useful for caching individual songs (e.g. songs viewed
+  /// from a set) without requiring a full library sync.
+  Future<void> upsertSongs(List<Song> songs) async {
+    if (songs.isEmpty) {
+      return;
+    }
+
+    await _database.batch((batch) {
+      batch.insertAll(
+        _database.songs,
+        songs.map(_companionFromSong).toList(),
+        mode: InsertMode.insertOrReplace,
+      );
     });
   }
 
