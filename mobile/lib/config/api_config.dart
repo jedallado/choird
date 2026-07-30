@@ -25,4 +25,8 @@ class ApiConfig {
   }
 
   static String get songsUrl => '$baseUrl/api/songs';
+
+  static String songUrl(int id) => '$songsUrl/$id';
+
+  static String get setsUrl => '$baseUrl/api/sets';
 }

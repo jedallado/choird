@@ -21,7 +21,7 @@ class SetController extends Controller
         return SetResource::collection(
             Set::query()
                 ->with(['setSongs.song'])
-                ->orderBy(SetModelEnum::scheduledFor())
+                ->orderByDesc(SetModelEnum::scheduledFor())
                 ->get()
         );
     }

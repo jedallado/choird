@@ -37,4 +37,21 @@ class SongApi {
         .map(Song.fromJson)
         .toList();
   }
+
+  Future<Song> fetchSong(int id) async {
+    final response = await _client.get(Uri.parse(ApiConfig.songUrl(id)));
+
+    if (response.statusCode != 200) {
+      throw SongApiException('Failed to load song (${response.statusCode}).');
+    }
+
+    final decoded = jsonDecode(response.body);
+
+    if (decoded is! Map<String, dynamic> ||
+        decoded['data'] is! Map<String, dynamic>) {
+      throw SongApiException('Unexpected response format from the server.');
+    }
+
+    return Song.fromJson(decoded['data'] as Map<String, dynamic>);
+  }
 }

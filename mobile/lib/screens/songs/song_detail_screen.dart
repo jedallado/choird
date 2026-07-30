@@ -10,9 +10,15 @@ class SongDetailScreen extends StatefulWidget {
   const SongDetailScreen({
     super.key,
     required this.song,
+    this.isModal = false,
+    this.onPrevious,
+    this.onNext,
   });
 
   final Song song;
+  final bool isModal;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
 
   @override
   State<SongDetailScreen> createState() => _SongDetailScreenState();
@@ -172,8 +178,27 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: widget.isModal
+            ? CloseButton(
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         title: Text(song.title),
         actions: [
+          if (widget.onPrevious != null || widget.onNext != null) ...[
+            IconButton(
+              onPressed: widget.onPrevious,
+              tooltip: 'Previous song',
+              iconSize: 22,
+              icon: const Icon(Icons.skip_previous),
+            ),
+            IconButton(
+              onPressed: widget.onNext,
+              tooltip: 'Next song',
+              iconSize: 22,
+              icon: const Icon(Icons.skip_next),
+            ),
+          ],
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
