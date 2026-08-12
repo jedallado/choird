@@ -49,6 +49,8 @@ RUN npm ci
 COPY vite.config.js ./
 COPY resources ./resources
 COPY public ./public
+# Filament theme.css imports vendor source styles during the Vite build.
+COPY --from=vendor /app/vendor/filament ./vendor/filament
 
 RUN npm run build
 
