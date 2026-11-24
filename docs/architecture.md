@@ -14,7 +14,7 @@ Filament  /admin
     ▼
 Laravel services ──► MySQL or PostgreSQL
     ▲
-    │  unauthenticated JSON
+    │  bearer token JSON
     │
 Flutter app
     │
@@ -26,18 +26,23 @@ Leaders write songs and set lists in Filament. The mobile app never writes catal
 
 ## API
 
-The HTTP API lives under `/api` and exposes two REST resources:
+The HTTP API lives under `/api`. Every route except login requires a Sanctum bearer token. Tokens last seven days.
 
-| Resource | Routes |
-| --- | --- |
-| Songs | `GET/POST /api/songs`, `GET/PUT/DELETE /api/songs/{id}` |
-| Sets | `GET/POST /api/sets`, `GET/PUT/DELETE /api/sets/{id}` |
+| Resource | Routes | Who |
+| --- | --- | --- |
+| Login | `POST /api/login` | Public. Returns a bearer token. |
+| Session | `POST /api/logout`, `GET/PUT /api/user` | Any signed-in user. Profile updates cannot change `role`. |
+| Users | `GET/POST /api/users`, `GET/PUT/DELETE /api/users/{id}` | Admin only |
+| Songs | `GET/POST /api/songs`, `GET/PUT/DELETE /api/songs/{id}` | Reads: any role. Writes: admin and manager |
+| Sets | `GET/POST /api/sets`, `GET/PUT/DELETE /api/sets/{id}` | Reads: any role. Writes: admin and manager |
 
 List and show responses use Laravel's resource wrapper: a `data` array or object. Field names in JSON are camelCase (`keyboardTranspose`, `scheduledFor`, `setSongs`, `createdAt`). Database columns stay snake_case. Enums in `api/app/Enums/Models/` own both names and the mapping between them.
 
 `GET /api/songs` returns every song, ordered by title. `GET /api/sets` returns every set with its songs and a short song summary (title, artist, key, capo, keyboard transpose), ordered by schedule, newest first. Full ChordPro content is not included on the set payload. The app fetches that with `GET /api/songs/{id}`.
 
-These routes have no authentication. Form requests currently authorize every caller. The mobile app only uses the GET endpoints. Create, update, and delete exist for the same resources and are what the admin path and any future writer would use.
+Roles are `admin`, `manager`, and `member`. Admins manage users. Admins and managers edit songs and set lists. Members can read the catalog and edit their own name, email, and password. Changing a password requires the current password. An admin cannot delete their own account, and cannot delete or demote the last admin. There is no public registration.
+
+The mobile app only uses the GET endpoints today, and it does not send a token yet. Create, update, and delete exist for songs and sets so an authorized client can write the catalog.
 
 A health check is available at `/up`.
 
@@ -51,11 +56,11 @@ Controllers in `api/app/Http/Controllers/Api/` stay thin. A write goes through:
 
 Set create and update run in a database transaction. Updating a set replaces its song rows when `setSongs` is present. Deleting a set cascades to those rows. Deleting a song is blocked while a set still references it. `scheduled_for` is unique, so two sets cannot share a time.
 
-Models extend `BaseModel`. The base constructor sets the table name and fillable columns from the model enum, so those strings are not repeated on the model.
+Song, set, and set-song models extend `BaseModel`. The base constructor sets the table name and fillable columns from the model enum, so those strings are not repeated on the model. `User` stays an `Authenticatable` model so Filament and Sanctum can use it. Its column names still come from `UserModelEnum`.
 
 ### Admin panel
 
-Filament serves the admin UI at `/admin`. Login is session-based and uses the `users` table. Creating a set stamps `created_by_user_id` with the signed-in user. The panel is the supported way to edit the catalog; the mobile app does not expose those forms.
+Filament serves the admin UI at `/admin`. Login is session-based and uses the `users` table. Only `admin` and `manager` users can open the panel. The Users resource is registered there, and only an admin can open it. Creating a set stamps `created_by_user_id` with the signed-in user. The panel is the supported way to edit the catalog; the mobile app does not expose those forms.
 
 The panel reuses the same models as the API. It does not call the JSON endpoints.
 
@@ -65,7 +70,7 @@ The API is built from `api/Dockerfile` and deployed to Railway. Configuration, m
 
 ## Mobile app
 
-The Flutter app (`mobile/`) is a single `MaterialApp` with three tabs that stay mounted in an `IndexedStack`: Songs, Set Lists, and Settings.
+The Flutter app (`mobile/`) starts on a sign-in screen. A saved bearer token that has not expired opens the three tabs, which stay mounted in an `IndexedStack`: Songs, Set Lists, and Settings. Signing out returns to the sign-in screen and leaves the downloaded catalog on the device.
 
 ### Where the API lives
 
@@ -75,11 +80,11 @@ The Flutter app (`mobile/`) is a single `MaterialApp` with three tabs that stay 
 - Debug builds use `localApiBaseUrl` from `api_config.local.dart` when it is set.
 - Otherwise debug builds use `http://10.0.2.2:8000` on Android and `http://127.0.0.1:8000` elsewhere.
 
-`SongApi` and `SetApi` issue GET requests and decode the `data` envelope into `Song` and `SetList`.
+`SongApi` and `SetApi` issue GET requests with `Authorization: Bearer` and decode the `data` envelope into `Song` and `SetList`. The token is kept in secure storage. A 401 clears it and returns the singer to sign-in.
 
 ### Offline cache
 
-The phone is usable with no network after one successful sync. Drift stores three tables in a SQLite database named `choird` under the app support directory:
+After one successful sync, the signed-in phone is usable with no network until the token expires. Drift stores three tables in a SQLite database named `choird` under the app support directory:
 
 - `songs` — full song rows, including ChordPro content
 - `sets` — set metadata
@@ -105,7 +110,7 @@ Last-sync timestamps are stored separately from the database, in shared preferen
 
 ```text
 users
-  id, name, email, password, …
+  id, name, email, password, role (admin, manager, member), …
 
 songs
   id, title, artist, key, capo, keyboard_transpose, content, timestamps
@@ -124,7 +129,6 @@ set_songs
 
 These are current boundaries, not planned work:
 
-- The JSON API is open. Possession of the base URL is enough to read or change the catalog.
 - Sync is a full download, not a delta. There is no push of local edits, because the app does not edit.
 - Song sync and set sync are independent. Each has its own button and timestamp.
-- The mobile app has no user accounts.
+- The mobile app does not yet edit songs, set lists, or the signed-in profile.

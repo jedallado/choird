@@ -48,8 +48,15 @@ In the API service **Variables** tab, add:
 | `SESSION_DRIVER` | `database` |
 | `CACHE_STORE` | `database` |
 | `QUEUE_CONNECTION` | `database` |
+| `MAIL_MAILER` | `smtp` (or another real mailer) |
+| `MAIL_HOST` | Your mail host |
+| `MAIL_PORT` | `587` |
+| `MAIL_USERNAME` | SMTP username |
+| `MAIL_PASSWORD` | SMTP password |
+| `MAIL_FROM_ADDRESS` | Address new users see the password email from |
+| `MAIL_FROM_NAME` | `Choird` |
 
-Replace `MySQL` / `Postgres` in `DB_URL` with your database service name if you renamed it.
+Replace `MySQL` / `Postgres` in `DB_URL` with your database service name if you renamed it. Creating a user in the admin panel emails them a temporary password, so those mail settings need to be real in production. The default `log` mailer only writes the message to the log.
 
 ## 6. Deploy
 
@@ -61,25 +68,26 @@ Click **Deploy**. On each deploy, Railway will:
 
 Health checks use Laravel’s `/up` endpoint.
 
-## 7. Create a Filament admin user
+## 7. Create an admin user
 
-After the first successful deploy, create an admin account:
+Deploying runs migrations. That migration marks every user that already exists as `admin`, so a current Filament account keeps full access.
+
+On a new environment, create an admin after the first successful deploy:
 
 ```bash
 railway link          # from api/ directory, if using Railway CLI
-railway run php artisan make:filament-user
+railway run php artisan choird:make-admin
 ```
 
-Or use the Railway dashboard **Shell** for the API service and run the same command.
+Or use the Railway dashboard **Shell** for the API service and run the same command. This account can sign in to Filament and to `POST /api/login`. `make:filament-user` does not set a role, so a user created that way is a member and cannot open the panel.
 
 ## 8. Verify the API
 
 ```bash
 curl https://YOUR-RAILWAY-DOMAIN.up.railway.app/up
-curl https://YOUR-RAILWAY-DOMAIN.up.railway.app/api/songs
 ```
 
-Filament admin panel: `https://YOUR-RAILWAY-DOMAIN.up.railway.app/admin`
+`/api/songs` and `/api/sets` require a bearer token from `POST /api/login`. Filament admin panel: `https://YOUR-RAILWAY-DOMAIN.up.railway.app/admin`
 
 ## Optional: queue worker service
 

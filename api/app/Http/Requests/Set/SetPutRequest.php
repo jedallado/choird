@@ -13,7 +13,9 @@ class SetPutRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+
+        return $user instanceof User && $user->canEditCatalog();
     }
 
     /**
@@ -28,17 +30,17 @@ class SetPutRequest extends BaseFormRequest
                 'sometimes',
                 'required',
                 'integer',
-                Rule::exists((new User())->getTable(), 'id'),
+                Rule::exists((new User)->getTable(), 'id'),
             ],
             SetModelEnum::notes() => 'sometimes|nullable|string',
             SetModelEnum::setSongs() => 'sometimes|required|array|min:1',
-            SetModelEnum::setSongs() . '.*.' . SetSongModelEnum::songId() => [
-                'required_with:' . SetModelEnum::setSongs(),
+            SetModelEnum::setSongs().'.*.'.SetSongModelEnum::songId() => [
+                'required_with:'.SetModelEnum::setSongs(),
                 'integer',
                 Rule::exists(SongModelEnum::tableName(), 'id'),
             ],
-            SetModelEnum::setSongs() . '.*.' . SetSongModelEnum::position() => [
-                'required_with:' . SetModelEnum::setSongs(),
+            SetModelEnum::setSongs().'.*.'.SetSongModelEnum::position() => [
+                'required_with:'.SetModelEnum::setSongs(),
                 'integer',
                 'min:1',
                 'distinct',
@@ -87,9 +89,9 @@ class SetPutRequest extends BaseFormRequest
     public function messages(): array
     {
         return [
-            SetModelEnum::scheduledFor() . '.required' => 'Scheduled date and time is required.',
-            SetModelEnum::createdByUserId() . '.required' => 'Creator is required.',
-            SetModelEnum::setSongs() . '.required' => 'At least one song is required.',
+            SetModelEnum::scheduledFor().'.required' => 'Scheduled date and time is required.',
+            SetModelEnum::createdByUserId().'.required' => 'Creator is required.',
+            SetModelEnum::setSongs().'.required' => 'At least one song is required.',
         ];
     }
 }

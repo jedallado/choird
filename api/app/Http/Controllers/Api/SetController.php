@@ -13,6 +13,7 @@ use App\Services\Set\DeleteSet;
 use App\Services\Set\UpdateSet;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 
 class SetController extends Controller
 {
@@ -47,6 +48,8 @@ class SetController extends Controller
 
     public function destroy(Set $set, DeleteSet $deleteSet): Response
     {
+        Gate::authorize('editCatalog');
+
         $deleteSet->handle($set);
 
         return response()->noContent();

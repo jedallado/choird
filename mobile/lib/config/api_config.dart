@@ -24,6 +24,10 @@ class ApiConfig {
     return 'http://127.0.0.1:8000';
   }
 
+  static String get loginUrl => '$baseUrl/api/login';
+
+  static String get logoutUrl => '$baseUrl/api/logout';
+
   static String get songsUrl => '$baseUrl/api/songs';
 
   static String songUrl(int id) => '$songsUrl/$id';

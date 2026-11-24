@@ -4,12 +4,15 @@ namespace App\Http\Requests\Song;
 
 use App\Enums\Models\SongModelEnum;
 use App\Http\Requests\BaseFormRequest;
+use App\Models\User;
 
 class SongPutRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+
+        return $user instanceof User && $user->canEditCatalog();
     }
 
     /**
@@ -41,8 +44,8 @@ class SongPutRequest extends BaseFormRequest
     public function messages(): array
     {
         return [
-            SongModelEnum::title() . '.required' => 'Title is required.',
-            SongModelEnum::content() . '.required' => 'Content is required.',
+            SongModelEnum::title().'.required' => 'Title is required.',
+            SongModelEnum::content().'.required' => 'Content is required.',
         ];
     }
 }

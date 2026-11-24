@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
 import '../models/song.dart';
+import 'api_headers.dart';
 
 class SongApiException implements Exception {
   SongApiException(this.message);
@@ -20,7 +21,14 @@ class SongApi {
   final http.Client _client;
 
   Future<List<Song>> fetchSongs() async {
-    final response = await _client.get(Uri.parse(ApiConfig.songsUrl));
+    final response = await _client.get(
+      Uri.parse(ApiConfig.songsUrl),
+      headers: await apiHeaders(),
+    );
+
+    if (await sessionWasRejected(response)) {
+      throw SongApiException('Your session has expired. Sign in again.');
+    }
 
     if (response.statusCode != 200) {
       throw SongApiException('Failed to load songs (${response.statusCode}).');
@@ -39,7 +47,14 @@ class SongApi {
   }
 
   Future<Song> fetchSong(int id) async {
-    final response = await _client.get(Uri.parse(ApiConfig.songUrl(id)));
+    final response = await _client.get(
+      Uri.parse(ApiConfig.songUrl(id)),
+      headers: await apiHeaders(),
+    );
+
+    if (await sessionWasRejected(response)) {
+      throw SongApiException('Your session has expired. Sign in again.');
+    }
 
     if (response.statusCode != 200) {
       throw SongApiException('Failed to load song (${response.statusCode}).');
