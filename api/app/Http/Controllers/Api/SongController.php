@@ -13,6 +13,7 @@ use App\Services\Song\DeleteSong;
 use App\Services\Song\UpdateSong;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 
 class SongController extends Controller
 {
@@ -44,6 +45,8 @@ class SongController extends Controller
 
     public function destroy(Song $song, DeleteSong $deleteSong): Response
     {
+        Gate::authorize('editCatalog');
+
         $deleteSong->handle($song);
 
         return response()->noContent();

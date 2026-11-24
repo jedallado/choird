@@ -2,18 +2,22 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Models\SetModelEnum;
+use App\Enums\Models\UserModelEnum;
+use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,9 +25,10 @@ class User extends Authenticatable implements FilamentUser
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        UserModelEnum::NAME->value,
+        UserModelEnum::EMAIL->value,
+        UserModelEnum::PASSWORD->value,
+        UserModelEnum::ROLE->value,
     ];
 
     /**
@@ -32,8 +37,8 @@ class User extends Authenticatable implements FilamentUser
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        UserModelEnum::PASSWORD->value,
+        UserModelEnum::REMEMBER_TOKEN->value,
     ];
 
     /**
@@ -44,13 +49,43 @@ class User extends Authenticatable implements FilamentUser
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            UserModelEnum::EMAIL_VERIFIED_AT->value => 'datetime',
+            UserModelEnum::PASSWORD->value => 'hashed',
+            UserModelEnum::ROLE->value => UserRole::class,
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->canEditCatalog();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::ADMIN;
+    }
+
+    public function canEditCatalog(): bool
+    {
+        return $this->role === UserRole::ADMIN || $this->role === UserRole::MANAGER;
+    }
+
+    public function isLastAdmin(): bool
+    {
+        if (! $this->isAdmin()) {
+            return false;
+        }
+
+        return static::query()
+            ->where(UserModelEnum::role(), UserRole::ADMIN->value)
+            ->count() === 1;
+    }
+
+    /**
+     * @return HasMany<Set, $this>
+     */
+    public function sets(): HasMany
+    {
+        return $this->hasMany(Set::class, SetModelEnum::createdByUserId());
     }
 }

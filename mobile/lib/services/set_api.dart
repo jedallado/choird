@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
 import '../models/set_list.dart';
+import 'api_headers.dart';
 
 class SetApiException implements Exception {
   SetApiException(this.message);
@@ -20,7 +21,14 @@ class SetApi {
   final http.Client _client;
 
   Future<List<SetList>> fetchSets() async {
-    final response = await _client.get(Uri.parse(ApiConfig.setsUrl));
+    final response = await _client.get(
+      Uri.parse(ApiConfig.setsUrl),
+      headers: await apiHeaders(),
+    );
+
+    if (await sessionWasRejected(response)) {
+      throw SetApiException('Your session has expired. Sign in again.');
+    }
 
     if (response.statusCode != 200) {
       throw SetApiException('Failed to load sets (${response.statusCode}).');

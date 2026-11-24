@@ -84,10 +84,12 @@ Song content is stored as ChordPro and rendered on the phone.
 
 ## Settings
 
-The Settings tab shows the installed app version and build number. Other settings are not implemented yet; the screen says they are coming soon. Text size is changed on the song screen, not here.
+The Settings tab shows who is signed in and a sign-out button, plus the installed app version and build number. Text size is changed on the song screen, not here. Signing out leaves downloaded songs and set lists on the phone, but they stay hidden until the next sign-in.
 
 ## Accounts
 
-Only the admin panel has accounts. An admin signs in at `/admin/login` to manage songs and set lists.
+The API has three roles. An admin can do everything, including creating users and assigning roles. A manager can edit songs and set lists, and can edit their own profile, but cannot manage users. A member can read songs and set lists and can edit their own name, email, and password.
 
-The mobile app has no sign-in. Anyone with the app can sync and read the published catalog.
+Admins and managers sign in to the admin panel at `/admin/login`. Members cannot. Admins manage users from the Users screen in that panel. Creating a user there emails them a temporary password. Managers do not see that screen. API clients sign in with `POST /api/login` and send the bearer token for a week.
+
+The mobile app asks for that same email and password before showing songs or set lists. The token is saved on the phone and sent with each request until it expires or the singer signs out.

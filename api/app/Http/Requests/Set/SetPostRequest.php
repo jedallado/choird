@@ -13,7 +13,9 @@ class SetPostRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+
+        return $user instanceof User && $user->canEditCatalog();
     }
 
     /**
@@ -27,16 +29,16 @@ class SetPostRequest extends BaseFormRequest
             SetModelEnum::createdByUserId() => [
                 'required',
                 'integer',
-                Rule::exists((new User())->getTable(), 'id'),
+                Rule::exists((new User)->getTable(), 'id'),
             ],
             SetModelEnum::notes() => 'nullable|string',
             SetModelEnum::setSongs() => 'required|array|min:1',
-            SetModelEnum::setSongs() . '.*.' . SetSongModelEnum::songId() => [
+            SetModelEnum::setSongs().'.*.'.SetSongModelEnum::songId() => [
                 'required',
                 'integer',
                 Rule::exists(SongModelEnum::tableName(), 'id'),
             ],
-            SetModelEnum::setSongs() . '.*.' . SetSongModelEnum::position() => [
+            SetModelEnum::setSongs().'.*.'.SetSongModelEnum::position() => [
                 'required',
                 'integer',
                 'min:1',
@@ -86,9 +88,9 @@ class SetPostRequest extends BaseFormRequest
     public function messages(): array
     {
         return [
-            SetModelEnum::scheduledFor() . '.required' => 'Scheduled date and time is required.',
-            SetModelEnum::createdByUserId() . '.required' => 'Creator is required.',
-            SetModelEnum::setSongs() . '.required' => 'At least one song is required.',
+            SetModelEnum::scheduledFor().'.required' => 'Scheduled date and time is required.',
+            SetModelEnum::createdByUserId().'.required' => 'Creator is required.',
+            SetModelEnum::setSongs().'.required' => 'At least one song is required.',
         ];
     }
 }
