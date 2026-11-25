@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Models\SongModelEnum;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Song extends BaseModel
 {
@@ -14,5 +15,13 @@ class Song extends BaseModel
     protected static function modelEnum(): string
     {
         return SongModelEnum::class;
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function createdByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, SongModelEnum::createdByUserId());
     }
 }

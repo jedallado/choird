@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Enums\Models\SetModelEnum;
+use App\Enums\Models\SongModelEnum;
 use App\Enums\UserRole;
 use App\Models\Set;
+use App\Models\Song;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -79,6 +81,25 @@ class UserManagementTest extends TestCase
         Set::create([
             SetModelEnum::scheduledFor() => now(),
             SetModelEnum::createdByUserId() => $manager->id,
+        ]);
+
+        $this->withBearer($admin->createToken('api')->plainTextToken)
+            ->deleteJson('/api/users/'.$manager->id)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['user']);
+
+        $this->assertModelExists($manager);
+    }
+
+    public function test_an_admin_cannot_delete_a_user_who_created_a_song(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $manager = User::factory()->manager()->create();
+
+        Song::create([
+            SongModelEnum::title() => 'Amazing Grace',
+            SongModelEnum::content() => '[G]Amazing grace',
+            SongModelEnum::createdByUserId() => $manager->id,
         ]);
 
         $this->withBearer($admin->createToken('api')->plainTextToken)

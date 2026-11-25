@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\Models\SongModelEnum;
+use App\Enums\Models\UserModelEnum;
 use App\Filament\Resources\SongResource\Pages\CreateSong;
 use App\Filament\Resources\SongResource\Pages\EditSong;
 use App\Filament\Resources\SongResource\Pages\ListSongs;
@@ -14,6 +15,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -53,6 +55,10 @@ class SongResource extends Resource
                     ->minValue(-11)
                     ->maxValue(11)
                     ->helperText('Semitones from chart key. +2 = up a whole step.'),
+                TextEntry::make('createdByUser.'.UserModelEnum::name())
+                    ->label('Created by')
+                    ->placeholder('Unknown')
+                    ->hiddenOn('create'),
                 Textarea::make(SongModelEnum::content())
                     ->required()
                     ->rows(20)

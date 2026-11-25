@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Models\SongModelEnum;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,6 +47,12 @@ class CatalogAuthorizationTest extends TestCase
                 'title' => 'New Song',
                 'content' => 'Lyrics',
             ])->assertCreated()
-            ->assertJsonPath('data.title', 'New Song');
+            ->assertJsonPath('data.title', 'New Song')
+            ->assertJsonMissingPath('data.createdByUserId');
+
+        $this->assertDatabaseHas(SongModelEnum::tableName(), [
+            SongModelEnum::title() => 'New Song',
+            SongModelEnum::createdByUserId() => $manager->id,
+        ]);
     }
 }

@@ -26,7 +26,10 @@ class SongController extends Controller
 
     public function store(SongPostRequest $request, CreateSong $createSong): SongResource
     {
-        $song = $createSong->handle($request->validated());
+        $data = $request->validated();
+        $data[SongModelEnum::createdByUserId()] = $request->user()->id;
+
+        $song = $createSong->handle($data);
 
         return new SongResource($song);
     }

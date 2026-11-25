@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Models\SetModelEnum;
+use App\Enums\Models\SongModelEnum;
 use App\Enums\Models\UserModelEnum;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
@@ -87,5 +88,13 @@ class User extends Authenticatable implements FilamentUser
     public function sets(): HasMany
     {
         return $this->hasMany(Set::class, SetModelEnum::createdByUserId());
+    }
+
+    /**
+     * @return HasMany<Song, $this>
+     */
+    public function songs(): HasMany
+    {
+        return $this->hasMany(Song::class, SongModelEnum::createdByUserId());
     }
 }

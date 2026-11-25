@@ -18,6 +18,10 @@ class DeleteUser
             return 'The last admin cannot be deleted.';
         }
 
+        if ($user->songs()->exists()) {
+            return 'This user cannot be deleted while they still have songs.';
+        }
+
         if ($user->sets()->exists()) {
             return 'This user cannot be deleted while they still have set lists.';
         }
