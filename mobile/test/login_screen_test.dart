@@ -91,7 +91,13 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(store.session?.token, 'token-1');
 
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.byTooltip('Open menu').hitTestable());
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find
+          .widgetWithText(NavigationDrawerDestination, 'Settings')
+          .hitTestable(),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Sign out'));
     await tester.pumpAndSettle();

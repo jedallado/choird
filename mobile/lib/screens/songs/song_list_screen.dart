@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import '../../models/song.dart';
 import '../../models/song_category.dart';
 import '../../services/song_repository.dart';
+import '../../widgets/open_menu_button.dart';
 import 'song_detail_screen.dart';
 
 class SongListScreen extends StatefulWidget {
-  const SongListScreen({super.key, SongRepository? repository})
+  const SongListScreen({super.key, this.onOpenMenu, SongRepository? repository})
     : _repository = repository;
 
+  final VoidCallback? onOpenMenu;
   final SongRepository? _repository;
 
   @override
@@ -91,9 +93,9 @@ class _SongListScreenState extends State<SongListScreen> {
         _isSyncing = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Songs synced.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Songs synced.')));
     } catch (error) {
       if (!mounted) {
         return;
@@ -139,9 +141,7 @@ class _SongListScreenState extends State<SongListScreen> {
     }
 
     final categories = categoriesById.values.toList()
-      ..sort(
-        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-      );
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     return categories;
   }
@@ -152,9 +152,7 @@ class _SongListScreenState extends State<SongListScreen> {
     return songs.where((song) {
       final matchesCategory =
           _selectedCategoryId == null ||
-          song.categories.any(
-            (category) => category.id == _selectedCategoryId,
-          );
+          song.categories.any((category) => category.id == _selectedCategoryId);
       if (!matchesCategory) {
         return false;
       }
@@ -164,8 +162,7 @@ class _SongListScreenState extends State<SongListScreen> {
       }
 
       final titleMatches = song.title.toLowerCase().contains(query);
-      final artistMatches =
-          song.artist?.toLowerCase().contains(query) ?? false;
+      final artistMatches = song.artist?.toLowerCase().contains(query) ?? false;
       return titleMatches || artistMatches;
     }).toList();
   }
@@ -310,6 +307,7 @@ class _SongListScreenState extends State<SongListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: OpenMenuButton.leading(widget.onOpenMenu),
         title: const Text('Songs'),
         actions: [
           if (_isSyncing)
@@ -341,9 +339,9 @@ class _SongListScreenState extends State<SongListScreen> {
                 child: Text(
                   'Last synced: ${_formatLastSyncedAt(_lastSyncedAt!)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(
-                      alpha: 0.7,
-                    ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -420,10 +418,7 @@ class _SongListScreenState extends State<SongListScreen> {
             ),
           ),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _syncSongs,
-              child: _buildBody(),
-            ),
+            child: RefreshIndicator(onRefresh: _syncSongs, child: _buildBody()),
           ),
         ],
       ),

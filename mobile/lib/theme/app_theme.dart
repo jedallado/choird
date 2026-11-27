@@ -46,6 +46,23 @@ abstract final class AppTheme {
           );
         }),
       ),
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: AppColors.background,
+        indicatorColor: AppColors.accent.withValues(alpha: 0.16),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final isSelected = states.contains(WidgetState.selected);
+          return TextStyle(
+            color: isSelected ? AppColors.accent : AppColors.lyrics,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final isSelected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: isSelected ? AppColors.accent : AppColors.lyrics,
+          );
+        }),
+      ),
       dividerTheme: DividerThemeData(
         color: AppColors.accent.withValues(alpha: 0.2),
       ),

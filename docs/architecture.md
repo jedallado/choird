@@ -70,7 +70,7 @@ The API is built from `api/Dockerfile` and deployed to Railway. Configuration, m
 
 ## Mobile app
 
-The Flutter app (`mobile/`) starts on a sign-in screen. A saved bearer token that has not expired opens the three tabs, which stay mounted in an `IndexedStack`: Songs, Set Lists, and Settings. Signing out returns to the sign-in screen and leaves the downloaded catalog on the device.
+The Flutter app (`mobile/`) starts on a sign-in screen. A saved bearer token that has not expired opens Home: the Songs and Set Lists tabs, which stay mounted in an `IndexedStack`. A header menu also opens Posts and Settings. Signing out returns to the sign-in screen and leaves the downloaded catalog on the device.
 
 ### Where the API lives
 

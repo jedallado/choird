@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../models/set_list.dart';
 import '../../services/set_repository.dart';
+import '../../widgets/open_menu_button.dart';
 import 'set_detail_screen.dart';
 
 class ScheduledScreen extends StatefulWidget {
-  const ScheduledScreen({super.key, SetRepository? repository})
+  const ScheduledScreen({super.key, this.onOpenMenu, SetRepository? repository})
     : _repository = repository;
 
+  final VoidCallback? onOpenMenu;
   final SetRepository? _repository;
 
   @override
@@ -82,9 +84,9 @@ class _ScheduledScreenState extends State<ScheduledScreen> {
         _isSyncing = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Set lists synced.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Set lists synced.')));
     } catch (error) {
       if (!mounted) {
         return;
@@ -111,9 +113,7 @@ class _ScheduledScreenState extends State<ScheduledScreen> {
     final localizations = MaterialLocalizations.of(context);
     final local = scheduledFor.toLocal();
     final date = localizations.formatMediumDate(local);
-    final time = localizations.formatTimeOfDay(
-      TimeOfDay.fromDateTime(local),
-    );
+    final time = localizations.formatTimeOfDay(TimeOfDay.fromDateTime(local));
 
     return '$date · $time';
   }
@@ -226,6 +226,7 @@ class _ScheduledScreenState extends State<ScheduledScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: OpenMenuButton.leading(widget.onOpenMenu),
         title: const Text('Set Lists'),
         actions: [
           if (_isSyncing)
@@ -257,18 +258,15 @@ class _ScheduledScreenState extends State<ScheduledScreen> {
                 child: Text(
                   'Last synced: ${_formatLastSyncedAt(_lastSyncedAt!)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(
-                      alpha: 0.7,
-                    ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ),
             ),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _syncSets,
-              child: _buildBody(),
-            ),
+            child: RefreshIndicator(onRefresh: _syncSets, child: _buildBody()),
           ),
         ],
       ),

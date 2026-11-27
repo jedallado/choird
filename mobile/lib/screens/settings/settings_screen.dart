@@ -3,11 +3,14 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../config/app_version.dart';
 import '../../models/auth_session.dart';
+import '../../widgets/open_menu_button.dart';
 import '../login_screen.dart';
 import 'change_password_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.onOpenMenu});
+
+  final VoidCallback? onOpenMenu;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -87,7 +90,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final user = AuthScope.of(context).session?.user;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(
+        leading: OpenMenuButton.leading(widget.onOpenMenu),
+        title: const Text('Settings'),
+      ),
       body: ListView(
         children: [
           if (user != null)

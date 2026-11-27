@@ -15,6 +15,15 @@ import 'package:choird/services/auth_api.dart';
 import 'package:choird/services/auth_controller.dart';
 import 'package:choird/services/auth_token_store.dart';
 
+Future<void> openSettingsFromMenu(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Open menu').hitTestable());
+  await tester.pumpAndSettle();
+  await tester.tap(
+    find.widgetWithText(NavigationDrawerDestination, 'Settings').hitTestable(),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -57,8 +66,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openSettingsFromMenu(tester);
 
     expect(find.text('Ada'), findsOneWidget);
     expect(find.textContaining('ada@example.com'), findsOneWidget);
@@ -127,8 +135,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openSettingsFromMenu(tester);
     await tester.tap(find.text('Change password'));
     await tester.pumpAndSettle();
 

@@ -84,7 +84,7 @@ Song content is stored as ChordPro and rendered on the phone.
 
 ## Settings
 
-The Settings tab shows who is signed in and a sign-out button, plus the installed app version and build number. Text size is changed on the song screen, not here. Signing out leaves downloaded songs and set lists on the phone, but they stay hidden until the next sign-in.
+Settings is in the header menu. It shows who is signed in and a sign-out button, plus the installed app version and build number. Text size is changed on the song screen, not here. Signing out leaves downloaded songs and set lists on the phone, but they stay hidden until the next sign-in. The same menu opens Home (Songs and Set Lists) and a Posts screen that says coming soon.
 
 ## Accounts
 
