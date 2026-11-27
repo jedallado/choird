@@ -4,6 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../config/app_version.dart';
 import '../../models/auth_session.dart';
 import '../login_screen.dart';
+import 'change_password_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,6 +35,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (_) {
       // Fall back to compile-time version from AppVersion.
     }
+  }
+
+  Future<void> _changePassword() async {
+    final changed = await showDialog<bool>(
+      context: context,
+      builder: (context) => const ChangePasswordDialog(),
+    );
+
+    if (changed != true || !mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Password changed.')));
   }
 
   Future<void> _signOut() async {
@@ -74,7 +90,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
-          if (user != null) _AccountSection(user: user, onSignOut: _signOut),
+          if (user != null)
+            _AccountSection(
+              user: user,
+              onChangePassword: _changePassword,
+              onSignOut: _signOut,
+            ),
           const Divider(height: 1),
           ListTile(
             title: const Text('Version'),
@@ -94,9 +115,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 class _AccountSection extends StatelessWidget {
-  const _AccountSection({required this.user, required this.onSignOut});
+  const _AccountSection({
+    required this.user,
+    required this.onChangePassword,
+    required this.onSignOut,
+  });
 
   final AuthUser user;
+  final VoidCallback onChangePassword;
   final VoidCallback onSignOut;
 
   @override
@@ -112,9 +138,19 @@ class _AccountSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: OutlinedButton(
-              onPressed: onSignOut,
-              child: const Text('Sign out'),
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                OutlinedButton(
+                  onPressed: onChangePassword,
+                  child: const Text('Change password'),
+                ),
+                OutlinedButton(
+                  onPressed: onSignOut,
+                  child: const Text('Sign out'),
+                ),
+              ],
             ),
           ),
         ),

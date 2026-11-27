@@ -39,6 +39,34 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> changePassword({
+    required String currentPassword,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final token = session?.token;
+    if (token == null) {
+      throw AuthException(
+        'Your session has expired. Sign in again.',
+        unauthorized: true,
+      );
+    }
+
+    try {
+      await _api.changePassword(
+        token: token,
+        currentPassword: currentPassword,
+        password: password,
+        passwordConfirmation: passwordConfirmation,
+      );
+    } on AuthException catch (error) {
+      if (error.unauthorized) {
+        await handleUnauthorized();
+      }
+      rethrow;
+    }
+  }
+
   Future<void> signOut() async {
     final token = session?.token;
     session = null;

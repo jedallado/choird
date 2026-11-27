@@ -6,9 +6,10 @@ import '../config/api_config.dart';
 import '../models/auth_session.dart';
 
 class AuthException implements Exception {
-  AuthException(this.message);
+  AuthException(this.message, {this.unauthorized = false});
 
   final String message;
+  final bool unauthorized;
 
   @override
   String toString() => message;
@@ -44,6 +45,36 @@ class AuthApi {
     }
 
     throw AuthException(_message(response) ?? 'Could not sign in.');
+  }
+
+  Future<void> changePassword({
+    required String token,
+    required String currentPassword,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final response = await _client.put(
+      Uri.parse(ApiConfig.userUrl),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'currentPassword': currentPassword,
+        'password': password,
+        'passwordConfirmation': passwordConfirmation,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return;
+    }
+
+    throw AuthException(
+      _message(response) ?? 'Could not change your password.',
+      unauthorized: response.statusCode == 401,
+    );
   }
 
   Future<void> logout(String token) async {

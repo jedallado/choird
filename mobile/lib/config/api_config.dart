@@ -28,6 +28,8 @@ class ApiConfig {
 
   static String get logoutUrl => '$baseUrl/api/logout';
 
+  static String get userUrl => '$baseUrl/api/user';
+
   static String get songsUrl => '$baseUrl/api/songs';
 
   static String songUrl(int id) => '$songsUrl/$id';
