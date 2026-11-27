@@ -5,4 +5,5 @@ abstract final class AppColors {
   static const lyrics = Color(0xFF222222);
   static const chords = Color(0xFF1565C0);
   static const accent = Color(0xFF8D6E63);
+  static const highlight = Color(0xFFE65100);
 }

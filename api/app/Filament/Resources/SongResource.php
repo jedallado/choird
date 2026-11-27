@@ -71,6 +71,14 @@ class SongResource extends Resource
                     ->preload()
                     ->searchable()
                     ->columnSpanFull(),
+                self::voiceUrlInput(
+                    SongModelEnum::sopranoUrl(),
+                    'Soprano',
+                    'Optional web link, such as a YouTube recording.',
+                ),
+                self::voiceUrlInput(SongModelEnum::altoUrl(), 'Alto'),
+                self::voiceUrlInput(SongModelEnum::tenorUrl(), 'Tenor'),
+                self::voiceUrlInput(SongModelEnum::bassUrl(), 'Bass'),
                 Textarea::make(SongModelEnum::content())
                     ->required()
                     ->rows(20)
@@ -134,5 +142,26 @@ class SongResource extends Resource
             'create' => CreateSong::route('/create'),
             'edit' => EditSong::route('/{record}/edit'),
         ];
+    }
+
+    private static function voiceUrlInput(string $name, string $label, ?string $helperText = null): TextInput
+    {
+        $input = TextInput::make($name)
+            ->label($label)
+            ->placeholder('https://www.youtube.com/watch?v=')
+            ->type('url')
+            ->rule('url:http,https', fn (mixed $state): bool => filled($state))
+            ->maxLength(2048)
+            ->columnSpanFull()
+            ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? $state : null)
+            ->validationMessages([
+                'url' => $label.' link must be a valid web address.',
+            ]);
+
+        if ($helperText !== null) {
+            $input->helperText($helperText);
+        }
+
+        return $input;
     }
 }

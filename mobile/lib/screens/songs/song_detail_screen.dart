@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/song.dart';
 import '../../models/song_content_font_size.dart';
@@ -94,9 +95,77 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         (song.keyboardTranspose != null && song.keyboardTranspose! != 0);
   }
 
+  void _showVideoLinks() {
+    final song = widget.song;
+    final links = <(String, String?)>[
+      ('Soprano', song.sopranoUrl),
+      ('Alto', song.altoUrl),
+      ('Tenor', song.tenorUrl),
+      ('Bass', song.bassUrl),
+    ];
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Video Links'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final (label, url) in links)
+                  _VoiceLinkTile(
+                    label: label,
+                    url: url,
+                    onOpen: _hasLink(url) ? () => _openLink(url!) : null,
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  bool _hasLink(String? url) {
+    return url != null && url.trim().isNotEmpty;
+  }
+
+  Future<void> _openLink(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      return;
+    }
+
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not open the link.')));
+    }
+  }
+
   String _formatKeyboardTranspose(int semitones) {
     final sign = semitones > 0 ? '+' : '';
     return 'Keyboard $sign$semitones';
+  }
+
+  Widget _setupChip(String label) {
+    return Chip(
+      label: Text(label),
+      backgroundColor: AppColors.highlight,
+      labelStyle: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.w700,
+      ),
+      side: const BorderSide(color: AppColors.highlight),
+    );
   }
 
   Widget _buildBottomToolbar(BuildContext context) {
@@ -137,10 +206,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   tooltip: 'Smaller text',
                   icon: const Text(
                     'A−',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                 ),
                 SizedBox(
@@ -158,10 +224,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   tooltip: 'Larger text',
                   icon: const Text(
                     'A+',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -179,9 +242,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: widget.isModal
-            ? CloseButton(
-                onPressed: () => Navigator.of(context).pop(),
-              )
+            ? CloseButton(onPressed: () => Navigator.of(context).pop())
             : null,
         title: Text(song.title),
         actions: [
@@ -202,16 +263,20 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
-              if (value == 'toggle_bottom_bar') {
+              if (value == 'video_links') {
+                _showVideoLinks();
+              } else if (value == 'toggle_bottom_bar') {
                 _toggleBottomBar();
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem<String>(
+                value: 'video_links',
+                child: Text('Music Links'),
+              ),
               PopupMenuItem<String>(
                 value: 'toggle_bottom_bar',
-                child: Text(
-                  _showBottomBar ? 'Hide toolbar' : 'Show toolbar',
-                ),
+                child: Text(_showBottomBar ? 'Hide toolbar' : 'Show toolbar'),
               ),
             ],
           ),
@@ -223,9 +288,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           if (song.artist != null && song.artist!.isNotEmpty) ...[
             Text(
               song.artist!,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.accent,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppColors.accent),
             ),
             const SizedBox(height: 8),
           ],
@@ -248,13 +313,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                 if (song.key != null && song.key!.isNotEmpty)
                   Chip(label: Text('Key: ${song.key}')),
                 if (song.capo != null && song.capo! > 0)
-                  Chip(label: Text('Capo ${song.capo}')),
-                if (song.keyboardTranspose != null && song.keyboardTranspose! != 0)
-                  Chip(
-                    label: Text(
-                      _formatKeyboardTranspose(song.keyboardTranspose!),
-                    ),
-                  ),
+                  _setupChip('Capo ${song.capo}'),
+                if (song.keyboardTranspose != null &&
+                    song.keyboardTranspose! != 0)
+                  _setupChip(_formatKeyboardTranspose(song.keyboardTranspose!)),
               ],
             ),
             const SizedBox(height: 16),
@@ -266,8 +328,41 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           ),
         ],
       ),
-      bottomNavigationBar:
-          _showBottomBar ? _buildBottomToolbar(context) : null,
+      bottomNavigationBar: _showBottomBar ? _buildBottomToolbar(context) : null,
+    );
+  }
+}
+
+class _VoiceLinkTile extends StatelessWidget {
+  const _VoiceLinkTile({
+    required this.label,
+    required this.url,
+    required this.onOpen,
+  });
+
+  final String label;
+  final String? url;
+  final VoidCallback? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final link = url?.trim();
+    final hasLink = link != null && link.isNotEmpty;
+    final theme = Theme.of(context);
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(label),
+      subtitle: Text(
+        hasLink ? link : 'No link',
+        style: hasLink
+            ? theme.textTheme.bodyMedium?.copyWith(color: AppColors.chords)
+            : theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+      ),
+      trailing: hasLink ? const Icon(Icons.open_in_new) : null,
+      onTap: onOpen,
     );
   }
 }

@@ -14,6 +14,10 @@ class Songs extends Table {
   IntColumn get capo => integer().nullable()();
   IntColumn get keyboardTranspose => integer().nullable()();
   TextColumn get content => text()();
+  TextColumn get sopranoUrl => text().nullable()();
+  TextColumn get altoUrl => text().nullable()();
+  TextColumn get tenorUrl => text().nullable()();
+  TextColumn get bassUrl => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -76,7 +80,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -91,6 +95,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         await m.createTable(categories);
         await m.createTable(songCategories);
+      }
+      if (from < 4) {
+        await m.addColumn(songs, songs.sopranoUrl);
+        await m.addColumn(songs, songs.altoUrl);
+        await m.addColumn(songs, songs.tenorUrl);
+        await m.addColumn(songs, songs.bassUrl);
       }
     },
   );

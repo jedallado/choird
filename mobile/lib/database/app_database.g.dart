@@ -75,6 +75,50 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _sopranoUrlMeta = const VerificationMeta(
+    'sopranoUrl',
+  );
+  @override
+  late final GeneratedColumn<String> sopranoUrl = GeneratedColumn<String>(
+    'soprano_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _altoUrlMeta = const VerificationMeta(
+    'altoUrl',
+  );
+  @override
+  late final GeneratedColumn<String> altoUrl = GeneratedColumn<String>(
+    'alto_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _tenorUrlMeta = const VerificationMeta(
+    'tenorUrl',
+  );
+  @override
+  late final GeneratedColumn<String> tenorUrl = GeneratedColumn<String>(
+    'tenor_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bassUrlMeta = const VerificationMeta(
+    'bassUrl',
+  );
+  @override
+  late final GeneratedColumn<String> bassUrl = GeneratedColumn<String>(
+    'bass_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -106,6 +150,10 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     capo,
     keyboardTranspose,
     content,
+    sopranoUrl,
+    altoUrl,
+    tenorUrl,
+    bassUrl,
     createdAt,
     updatedAt,
   ];
@@ -167,6 +215,30 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     } else if (isInserting) {
       context.missing(_contentMeta);
     }
+    if (data.containsKey('soprano_url')) {
+      context.handle(
+        _sopranoUrlMeta,
+        sopranoUrl.isAcceptableOrUnknown(data['soprano_url']!, _sopranoUrlMeta),
+      );
+    }
+    if (data.containsKey('alto_url')) {
+      context.handle(
+        _altoUrlMeta,
+        altoUrl.isAcceptableOrUnknown(data['alto_url']!, _altoUrlMeta),
+      );
+    }
+    if (data.containsKey('tenor_url')) {
+      context.handle(
+        _tenorUrlMeta,
+        tenorUrl.isAcceptableOrUnknown(data['tenor_url']!, _tenorUrlMeta),
+      );
+    }
+    if (data.containsKey('bass_url')) {
+      context.handle(
+        _bassUrlMeta,
+        bassUrl.isAcceptableOrUnknown(data['bass_url']!, _bassUrlMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -220,6 +292,22 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
         DriftSqlType.string,
         data['${effectivePrefix}content'],
       )!,
+      sopranoUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}soprano_url'],
+      ),
+      altoUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}alto_url'],
+      ),
+      tenorUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tenor_url'],
+      ),
+      bassUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bass_url'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -245,6 +333,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
   final int? capo;
   final int? keyboardTranspose;
   final String content;
+  final String? sopranoUrl;
+  final String? altoUrl;
+  final String? tenorUrl;
+  final String? bassUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
   const SongEntry({
@@ -255,6 +347,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     this.capo,
     this.keyboardTranspose,
     required this.content,
+    this.sopranoUrl,
+    this.altoUrl,
+    this.tenorUrl,
+    this.bassUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -276,6 +372,18 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       map['keyboard_transpose'] = Variable<int>(keyboardTranspose);
     }
     map['content'] = Variable<String>(content);
+    if (!nullToAbsent || sopranoUrl != null) {
+      map['soprano_url'] = Variable<String>(sopranoUrl);
+    }
+    if (!nullToAbsent || altoUrl != null) {
+      map['alto_url'] = Variable<String>(altoUrl);
+    }
+    if (!nullToAbsent || tenorUrl != null) {
+      map['tenor_url'] = Variable<String>(tenorUrl);
+    }
+    if (!nullToAbsent || bassUrl != null) {
+      map['bass_url'] = Variable<String>(bassUrl);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -294,6 +402,18 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           ? const Value.absent()
           : Value(keyboardTranspose),
       content: Value(content),
+      sopranoUrl: sopranoUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sopranoUrl),
+      altoUrl: altoUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(altoUrl),
+      tenorUrl: tenorUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tenorUrl),
+      bassUrl: bassUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bassUrl),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -312,6 +432,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       capo: serializer.fromJson<int?>(json['capo']),
       keyboardTranspose: serializer.fromJson<int?>(json['keyboardTranspose']),
       content: serializer.fromJson<String>(json['content']),
+      sopranoUrl: serializer.fromJson<String?>(json['sopranoUrl']),
+      altoUrl: serializer.fromJson<String?>(json['altoUrl']),
+      tenorUrl: serializer.fromJson<String?>(json['tenorUrl']),
+      bassUrl: serializer.fromJson<String?>(json['bassUrl']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -327,6 +451,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       'capo': serializer.toJson<int?>(capo),
       'keyboardTranspose': serializer.toJson<int?>(keyboardTranspose),
       'content': serializer.toJson<String>(content),
+      'sopranoUrl': serializer.toJson<String?>(sopranoUrl),
+      'altoUrl': serializer.toJson<String?>(altoUrl),
+      'tenorUrl': serializer.toJson<String?>(tenorUrl),
+      'bassUrl': serializer.toJson<String?>(bassUrl),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -340,6 +468,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     Value<int?> capo = const Value.absent(),
     Value<int?> keyboardTranspose = const Value.absent(),
     String? content,
+    Value<String?> sopranoUrl = const Value.absent(),
+    Value<String?> altoUrl = const Value.absent(),
+    Value<String?> tenorUrl = const Value.absent(),
+    Value<String?> bassUrl = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => SongEntry(
@@ -352,6 +484,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
         ? keyboardTranspose.value
         : this.keyboardTranspose,
     content: content ?? this.content,
+    sopranoUrl: sopranoUrl.present ? sopranoUrl.value : this.sopranoUrl,
+    altoUrl: altoUrl.present ? altoUrl.value : this.altoUrl,
+    tenorUrl: tenorUrl.present ? tenorUrl.value : this.tenorUrl,
+    bassUrl: bassUrl.present ? bassUrl.value : this.bassUrl,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -366,6 +502,12 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           ? data.keyboardTranspose.value
           : this.keyboardTranspose,
       content: data.content.present ? data.content.value : this.content,
+      sopranoUrl: data.sopranoUrl.present
+          ? data.sopranoUrl.value
+          : this.sopranoUrl,
+      altoUrl: data.altoUrl.present ? data.altoUrl.value : this.altoUrl,
+      tenorUrl: data.tenorUrl.present ? data.tenorUrl.value : this.tenorUrl,
+      bassUrl: data.bassUrl.present ? data.bassUrl.value : this.bassUrl,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -381,6 +523,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           ..write('capo: $capo, ')
           ..write('keyboardTranspose: $keyboardTranspose, ')
           ..write('content: $content, ')
+          ..write('sopranoUrl: $sopranoUrl, ')
+          ..write('altoUrl: $altoUrl, ')
+          ..write('tenorUrl: $tenorUrl, ')
+          ..write('bassUrl: $bassUrl, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -396,6 +542,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     capo,
     keyboardTranspose,
     content,
+    sopranoUrl,
+    altoUrl,
+    tenorUrl,
+    bassUrl,
     createdAt,
     updatedAt,
   );
@@ -410,6 +560,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           other.capo == this.capo &&
           other.keyboardTranspose == this.keyboardTranspose &&
           other.content == this.content &&
+          other.sopranoUrl == this.sopranoUrl &&
+          other.altoUrl == this.altoUrl &&
+          other.tenorUrl == this.tenorUrl &&
+          other.bassUrl == this.bassUrl &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -422,6 +576,10 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
   final Value<int?> capo;
   final Value<int?> keyboardTranspose;
   final Value<String> content;
+  final Value<String?> sopranoUrl;
+  final Value<String?> altoUrl;
+  final Value<String?> tenorUrl;
+  final Value<String?> bassUrl;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const SongsCompanion({
@@ -432,6 +590,10 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     this.capo = const Value.absent(),
     this.keyboardTranspose = const Value.absent(),
     this.content = const Value.absent(),
+    this.sopranoUrl = const Value.absent(),
+    this.altoUrl = const Value.absent(),
+    this.tenorUrl = const Value.absent(),
+    this.bassUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -443,6 +605,10 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     this.capo = const Value.absent(),
     this.keyboardTranspose = const Value.absent(),
     required String content,
+    this.sopranoUrl = const Value.absent(),
+    this.altoUrl = const Value.absent(),
+    this.tenorUrl = const Value.absent(),
+    this.bassUrl = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : title = Value(title),
@@ -457,6 +623,10 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     Expression<int>? capo,
     Expression<int>? keyboardTranspose,
     Expression<String>? content,
+    Expression<String>? sopranoUrl,
+    Expression<String>? altoUrl,
+    Expression<String>? tenorUrl,
+    Expression<String>? bassUrl,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -468,6 +638,10 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
       if (capo != null) 'capo': capo,
       if (keyboardTranspose != null) 'keyboard_transpose': keyboardTranspose,
       if (content != null) 'content': content,
+      if (sopranoUrl != null) 'soprano_url': sopranoUrl,
+      if (altoUrl != null) 'alto_url': altoUrl,
+      if (tenorUrl != null) 'tenor_url': tenorUrl,
+      if (bassUrl != null) 'bass_url': bassUrl,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -481,6 +655,10 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     Value<int?>? capo,
     Value<int?>? keyboardTranspose,
     Value<String>? content,
+    Value<String?>? sopranoUrl,
+    Value<String?>? altoUrl,
+    Value<String?>? tenorUrl,
+    Value<String?>? bassUrl,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -492,6 +670,10 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
       capo: capo ?? this.capo,
       keyboardTranspose: keyboardTranspose ?? this.keyboardTranspose,
       content: content ?? this.content,
+      sopranoUrl: sopranoUrl ?? this.sopranoUrl,
+      altoUrl: altoUrl ?? this.altoUrl,
+      tenorUrl: tenorUrl ?? this.tenorUrl,
+      bassUrl: bassUrl ?? this.bassUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -521,6 +703,18 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     if (content.present) {
       map['content'] = Variable<String>(content.value);
     }
+    if (sopranoUrl.present) {
+      map['soprano_url'] = Variable<String>(sopranoUrl.value);
+    }
+    if (altoUrl.present) {
+      map['alto_url'] = Variable<String>(altoUrl.value);
+    }
+    if (tenorUrl.present) {
+      map['tenor_url'] = Variable<String>(tenorUrl.value);
+    }
+    if (bassUrl.present) {
+      map['bass_url'] = Variable<String>(bassUrl.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -540,6 +734,10 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
           ..write('capo: $capo, ')
           ..write('keyboardTranspose: $keyboardTranspose, ')
           ..write('content: $content, ')
+          ..write('sopranoUrl: $sopranoUrl, ')
+          ..write('altoUrl: $altoUrl, ')
+          ..write('tenorUrl: $tenorUrl, ')
+          ..write('bassUrl: $bassUrl, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1977,6 +2175,10 @@ typedef $$SongsTableCreateCompanionBuilder =
       Value<int?> capo,
       Value<int?> keyboardTranspose,
       required String content,
+      Value<String?> sopranoUrl,
+      Value<String?> altoUrl,
+      Value<String?> tenorUrl,
+      Value<String?> bassUrl,
       required DateTime createdAt,
       required DateTime updatedAt,
     });
@@ -1989,6 +2191,10 @@ typedef $$SongsTableUpdateCompanionBuilder =
       Value<int?> capo,
       Value<int?> keyboardTranspose,
       Value<String> content,
+      Value<String?> sopranoUrl,
+      Value<String?> altoUrl,
+      Value<String?> tenorUrl,
+      Value<String?> bassUrl,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -2033,6 +2239,26 @@ class $$SongsTableFilterComposer extends Composer<_$AppDatabase, $SongsTable> {
 
   ColumnFilters<String> get content => $composableBuilder(
     column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sopranoUrl => $composableBuilder(
+    column: $table.sopranoUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get altoUrl => $composableBuilder(
+    column: $table.altoUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tenorUrl => $composableBuilder(
+    column: $table.tenorUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bassUrl => $composableBuilder(
+    column: $table.bassUrl,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2091,6 +2317,26 @@ class $$SongsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get sopranoUrl => $composableBuilder(
+    column: $table.sopranoUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get altoUrl => $composableBuilder(
+    column: $table.altoUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tenorUrl => $composableBuilder(
+    column: $table.tenorUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bassUrl => $composableBuilder(
+    column: $table.bassUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2134,6 +2380,20 @@ class $$SongsTableAnnotationComposer
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
+  GeneratedColumn<String> get sopranoUrl => $composableBuilder(
+    column: $table.sopranoUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get altoUrl =>
+      $composableBuilder(column: $table.altoUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get tenorUrl =>
+      $composableBuilder(column: $table.tenorUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get bassUrl =>
+      $composableBuilder(column: $table.bassUrl, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -2176,6 +2436,10 @@ class $$SongsTableTableManager
                 Value<int?> capo = const Value.absent(),
                 Value<int?> keyboardTranspose = const Value.absent(),
                 Value<String> content = const Value.absent(),
+                Value<String?> sopranoUrl = const Value.absent(),
+                Value<String?> altoUrl = const Value.absent(),
+                Value<String?> tenorUrl = const Value.absent(),
+                Value<String?> bassUrl = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => SongsCompanion(
@@ -2186,6 +2450,10 @@ class $$SongsTableTableManager
                 capo: capo,
                 keyboardTranspose: keyboardTranspose,
                 content: content,
+                sopranoUrl: sopranoUrl,
+                altoUrl: altoUrl,
+                tenorUrl: tenorUrl,
+                bassUrl: bassUrl,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -2198,6 +2466,10 @@ class $$SongsTableTableManager
                 Value<int?> capo = const Value.absent(),
                 Value<int?> keyboardTranspose = const Value.absent(),
                 required String content,
+                Value<String?> sopranoUrl = const Value.absent(),
+                Value<String?> altoUrl = const Value.absent(),
+                Value<String?> tenorUrl = const Value.absent(),
+                Value<String?> bassUrl = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
               }) => SongsCompanion.insert(
@@ -2208,6 +2480,10 @@ class $$SongsTableTableManager
                 capo: capo,
                 keyboardTranspose: keyboardTranspose,
                 content: content,
+                sopranoUrl: sopranoUrl,
+                altoUrl: altoUrl,
+                tenorUrl: tenorUrl,
+                bassUrl: bassUrl,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),

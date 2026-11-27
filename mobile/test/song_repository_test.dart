@@ -35,6 +35,10 @@ void main() {
       "capo": 2,
       "keyboardTranspose": 0,
       "content": "[G]Amazing grace",
+      "sopranoUrl": "https://www.youtube.com/watch?v=soprano",
+      "altoUrl": null,
+      "tenorUrl": null,
+      "bassUrl": null,
       "categories": [
         {"id": 4, "name": "Worship"},
         {"id": 3, "name": "Hymns"}
@@ -75,6 +79,8 @@ void main() {
     expect(local, hasLength(1));
     expect(local.first.id, 1);
     expect(local.first.content, '[G]Amazing grace');
+    expect(local.first.sopranoUrl, 'https://www.youtube.com/watch?v=soprano');
+    expect(local.first.altoUrl, isNull);
     expect(local.first.categories.map((category) => category.name), [
       'Hymns',
       'Worship',

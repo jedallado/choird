@@ -5,6 +5,8 @@ import 'package:choird/models/song_category.dart';
 import 'package:choird/screens/scheduled/set_detail_screen.dart';
 import 'package:choird/screens/songs/song_detail_screen.dart';
 import 'package:choird/screens/songs/song_list_screen.dart';
+import 'package:choird/theme/app_colors.dart';
+import 'package:choird/theme/app_theme.dart';
 import 'package:choird/services/song_api.dart';
 import 'package:choird/services/song_local_store.dart';
 import 'package:choird/services/song_repository.dart';
@@ -47,6 +49,35 @@ void main() {
     expect(find.text('Hymns'), findsOneWidget);
     expect(find.text('Worship'), findsOneWidget);
     expect(find.text('Key: G'), findsOneWidget);
+  });
+
+  testWidgets('capo and transpose chips use a stronger color', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: SongDetailScreen(
+          song: Song(
+            id: 1,
+            title: 'Amazing Grace',
+            key: 'G',
+            capo: 2,
+            keyboardTranspose: 1,
+            content: '[G]Amazing grace',
+            createdAt: DateTime.utc(2026, 1, 1),
+            updatedAt: DateTime.utc(2026, 1, 2),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    Chip chip(String label) {
+      return tester.widget<Chip>(find.widgetWithText(Chip, label));
+    }
+
+    expect(chip('Capo 2').backgroundColor, AppColors.highlight);
+    expect(chip('Keyboard +1').backgroundColor, AppColors.highlight);
+    expect(chip('Key: G').backgroundColor, isNull);
   });
 
   testWidgets('song detail omits categories when a song has none', (
@@ -96,10 +127,7 @@ void main() {
     expect(find.text('Traditional'), findsOneWidget);
     expect(find.text('All Categories'), findsOneWidget);
     expect(
-      find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Hymns'),
-      ),
+      find.descendant(of: find.byType(ListTile), matching: find.text('Hymns')),
       findsNothing,
     );
     expect(

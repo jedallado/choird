@@ -29,6 +29,10 @@ class SongPutRequest extends BaseFormRequest
             SongModelEnum::capo() => 'sometimes|nullable|integer|min:0|max:11',
             SongModelEnum::keyboardTranspose() => 'sometimes|nullable|integer|min:-11|max:11',
             SongModelEnum::content() => 'sometimes|required|string',
+            SongModelEnum::sopranoUrl() => 'sometimes|nullable|url:http,https|max:2048',
+            SongModelEnum::altoUrl() => 'sometimes|nullable|url:http,https|max:2048',
+            SongModelEnum::tenorUrl() => 'sometimes|nullable|url:http,https|max:2048',
+            SongModelEnum::bassUrl() => 'sometimes|nullable|url:http,https|max:2048',
             SongModelEnum::categoryIds() => 'sometimes|array',
             SongModelEnum::categoryIds().'.*' => [
                 'integer',
@@ -54,6 +58,10 @@ class SongPutRequest extends BaseFormRequest
         return [
             SongModelEnum::title().'.required' => 'Title is required.',
             SongModelEnum::content().'.required' => 'Content is required.',
+            SongModelEnum::sopranoUrl().'.url' => 'Soprano link must be a valid web address.',
+            SongModelEnum::altoUrl().'.url' => 'Alto link must be a valid web address.',
+            SongModelEnum::tenorUrl().'.url' => 'Tenor link must be a valid web address.',
+            SongModelEnum::bassUrl().'.url' => 'Bass link must be a valid web address.',
             SongModelEnum::categoryIds().'.*.exists' => 'A selected category does not exist.',
             SongModelEnum::categoryIds().'.*.distinct' => 'Each category can only be selected once.',
         ];
