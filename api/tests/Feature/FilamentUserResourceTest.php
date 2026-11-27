@@ -49,7 +49,8 @@ class FilamentUserResourceTest extends TestCase
         Livewire::actingAs($admin)
             ->test(CreateUser::class)
             ->fillForm([
-                'name' => 'New Singer',
+                'first_name' => 'New',
+                'last_name' => 'Singer',
                 'email' => 'singer@example.com',
                 'role' => UserRole::MEMBER->value,
             ])
@@ -59,6 +60,9 @@ class FilamentUserResourceTest extends TestCase
         $singer = User::query()->where('email', 'singer@example.com')->first();
 
         $this->assertNotNull($singer);
+        $this->assertSame('New', $singer->first_name);
+        $this->assertSame('Singer', $singer->last_name);
+        $this->assertSame('New Singer', $singer->name);
         $this->assertSame(UserRole::MEMBER, $singer->role);
 
         Mail::assertSent(TemporaryPasswordMail::class, function (TemporaryPasswordMail $mail) use ($singer): bool {

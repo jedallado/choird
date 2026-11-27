@@ -22,7 +22,10 @@ class UserController extends Controller
         Gate::authorize('manageUsers');
 
         return UserResource::collection(
-            User::query()->orderBy(UserModelEnum::name())->get()
+            User::query()
+                ->orderBy(UserModelEnum::firstName())
+                ->orderBy(UserModelEnum::lastName())
+                ->get()
         );
     }
 

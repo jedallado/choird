@@ -14,7 +14,8 @@ class UpdateCurrentUser
     public function handle(User $user, array $data): User
     {
         $updates = Arr::only($data, [
-            UserModelEnum::name(),
+            UserModelEnum::firstName(),
+            UserModelEnum::lastName(),
             UserModelEnum::email(),
             UserModelEnum::password(),
         ]);

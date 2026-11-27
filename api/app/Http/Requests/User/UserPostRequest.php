@@ -23,7 +23,8 @@ class UserPostRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            UserModelEnum::name() => 'required|string|max:255',
+            UserModelEnum::firstName() => 'required|string|max:255',
+            UserModelEnum::lastName() => 'nullable|string|max:255',
             UserModelEnum::email() => [
                 'required',
                 'string',
@@ -50,7 +51,8 @@ class UserPostRequest extends BaseFormRequest
     public function messages(): array
     {
         return [
-            UserModelEnum::name().'.required' => 'Name is required.',
+            UserModelEnum::firstName().'.required' => 'First name is required.',
+            UserModelEnum::lastName().'.max' => 'Last name must be 255 characters or fewer.',
             UserModelEnum::email().'.required' => 'Email is required.',
             UserModelEnum::email().'.unique' => 'Email is already in use.',
             UserModelEnum::password().'.required' => 'Password is required.',

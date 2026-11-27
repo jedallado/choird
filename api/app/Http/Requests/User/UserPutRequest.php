@@ -26,7 +26,8 @@ class UserPutRequest extends BaseFormRequest
         $targetId = $target instanceof User ? $target->id : $target;
 
         return [
-            UserModelEnum::name() => 'sometimes|required|string|max:255',
+            UserModelEnum::firstName() => 'sometimes|required|string|max:255',
+            UserModelEnum::lastName() => 'sometimes|nullable|string|max:255',
             UserModelEnum::email() => [
                 'sometimes',
                 'required',
@@ -54,7 +55,8 @@ class UserPutRequest extends BaseFormRequest
     public function messages(): array
     {
         return [
-            UserModelEnum::name().'.required' => 'Name is required.',
+            UserModelEnum::firstName().'.required' => 'First name is required.',
+            UserModelEnum::lastName().'.max' => 'Last name must be 255 characters or fewer.',
             UserModelEnum::email().'.required' => 'Email is required.',
             UserModelEnum::email().'.unique' => 'Email is already in use.',
             UserModelEnum::password().'.required' => 'Password is required.',

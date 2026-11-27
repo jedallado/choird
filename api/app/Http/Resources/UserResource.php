@@ -18,7 +18,9 @@ class UserResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'name' => $this->getAttribute(UserModelEnum::name()),
+            'name' => $this->getAttribute(UserModelEnum::fullName()),
+            'firstName' => $this->getAttribute(UserModelEnum::firstName()),
+            'lastName' => $this->getAttribute(UserModelEnum::lastName()),
             'email' => $this->getAttribute(UserModelEnum::email()),
             'role' => $role instanceof UserRole ? $role->value : $role,
             'createdAt' => $this->getAttribute(UserModelEnum::createdAt()),

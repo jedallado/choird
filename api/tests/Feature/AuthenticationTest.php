@@ -74,13 +74,18 @@ class AuthenticationTest extends TestCase
         $token = $user->createToken('api')->plainTextToken;
 
         $this->withBearer($token)->putJson('/api/user', [
-            'name' => 'New Name',
+            'firstName' => 'New',
+            'lastName' => 'Name',
             'role' => 'admin',
         ])->assertOk()
             ->assertJsonPath('data.name', 'New Name')
+            ->assertJsonPath('data.firstName', 'New')
+            ->assertJsonPath('data.lastName', 'Name')
             ->assertJsonPath('data.role', 'member');
 
-        $this->assertSame('member', $user->refresh()->role->value);
+        $user->refresh();
+        $this->assertSame('member', $user->role->value);
+        $this->assertSame('New Name', $user->name);
     }
 
     public function test_changing_a_password_requires_the_current_password(): void

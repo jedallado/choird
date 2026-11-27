@@ -18,14 +18,16 @@ class MakeAdmin extends Command
     public function handle(CreateUser $createUser): int
     {
         $data = [
-            UserModelEnum::name() => $this->ask('Name'),
+            UserModelEnum::firstName() => $this->ask('First name'),
+            UserModelEnum::lastName() => $this->ask('Last name (optional)') ?: null,
             UserModelEnum::email() => $this->ask('Email'),
             UserModelEnum::password() => $this->secret('Password'),
             UserModelEnum::role() => UserRole::ADMIN->value,
         ];
 
         $validator = Validator::make($data, [
-            UserModelEnum::name() => 'required|string|max:255',
+            UserModelEnum::firstName() => 'required|string|max:255',
+            UserModelEnum::lastName() => 'nullable|string|max:255',
             UserModelEnum::email() => [
                 'required',
                 'string',

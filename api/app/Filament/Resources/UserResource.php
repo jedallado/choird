@@ -21,6 +21,9 @@ use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
 class UserResource extends Resource
@@ -29,14 +32,18 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    protected static ?string $recordTitleAttribute = UserModelEnum::NAME->value;
+    protected static ?string $recordTitleAttribute = UserModelEnum::FIRST_NAME->value;
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make(UserModelEnum::name())
+                TextInput::make(UserModelEnum::firstName())
+                    ->label('First name')
                     ->required()
+                    ->maxLength(255),
+                TextInput::make(UserModelEnum::lastName())
+                    ->label('Last name')
                     ->maxLength(255),
                 TextInput::make(UserModelEnum::email())
                     ->email()
@@ -75,9 +82,21 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make(UserModelEnum::name())
-                    ->searchable()
-                    ->sortable(),
+                TextColumn::make(UserModelEnum::fullName())
+                    ->label('Name')
+                    ->state(fn (User $record): string => (string) $record->getAttribute(UserModelEnum::fullName()))
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $like = '%'.$search.'%';
+
+                        return $query->where(function (Builder $query) use ($like): void {
+                            $query->where(UserModelEnum::firstName(), 'like', $like)
+                                ->orWhere(UserModelEnum::lastName(), 'like', $like);
+                        });
+                    })
+                    ->sortable([
+                        UserModelEnum::firstName(),
+                        UserModelEnum::lastName(),
+                    ]),
                 TextColumn::make(UserModelEnum::email())
                     ->searchable()
                     ->sortable(),
@@ -94,7 +113,7 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable(),
             ])
-            ->defaultSort(UserModelEnum::name())
+            ->defaultSort(UserModelEnum::firstName())
             ->recordActions([
                 EditAction::make(),
                 self::deleteAction(),
@@ -142,6 +161,26 @@ class UserResource extends Resource
             'create' => CreateUser::route('/create'),
             'edit' => EditUser::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            UserModelEnum::firstName(),
+            UserModelEnum::lastName(),
+        ];
+    }
+
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        if (! $record instanceof User) {
+            return static::getModelLabel();
+        }
+
+        return (string) $record->getAttribute(UserModelEnum::fullName());
     }
 
     /**

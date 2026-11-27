@@ -22,7 +22,8 @@ class UserManagementTest extends TestCase
         $member = User::factory()->create();
 
         $payload = [
-            'name' => 'New Singer',
+            'firstName' => 'New',
+            'lastName' => 'Singer',
             'email' => 'new@example.com',
             'password' => 'password123',
             'passwordConfirmation' => 'password123',
@@ -41,7 +42,28 @@ class UserManagementTest extends TestCase
             ->postJson('/api/users', $payload)
             ->assertCreated()
             ->assertJsonPath('data.role', 'member')
-            ->assertJsonPath('data.email', 'new@example.com');
+            ->assertJsonPath('data.email', 'new@example.com')
+            ->assertJsonPath('data.firstName', 'New')
+            ->assertJsonPath('data.lastName', 'Singer')
+            ->assertJsonPath('data.name', 'New Singer');
+    }
+
+    public function test_a_user_can_be_created_without_a_last_name(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->withBearer($admin->createToken('api')->plainTextToken)
+            ->postJson('/api/users', [
+                'firstName' => 'Cher',
+                'email' => 'cher@example.com',
+                'password' => 'password123',
+                'passwordConfirmation' => 'password123',
+                'role' => 'member',
+            ])
+            ->assertCreated()
+            ->assertJsonPath('data.firstName', 'Cher')
+            ->assertJsonPath('data.lastName', null)
+            ->assertJsonPath('data.name', 'Cher');
     }
 
     public function test_the_last_admin_cannot_be_demoted_or_deleted(): void

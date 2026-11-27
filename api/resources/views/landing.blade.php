@@ -28,7 +28,7 @@
             </ul>
             <a href="{{ url('/admin/login') }}"
                class="rounded-full border border-accent/40 px-4 py-2 text-sm font-semibold text-accent-dark transition hover:bg-accent hover:text-white">
-                Leader login
+                Manager login
             </a>
         </nav>
     </header>
@@ -46,7 +46,7 @@
                     <span class="text-accent">Always in tune.</span>
                 </h1>
                 <p class="mt-6 max-w-xl text-lg leading-relaxed text-ink/70">
-                    Choird is a choir songbook. Leaders prepare songs and set lists in one place, and singers read
+                    Choird is a choir songbook. Managers prepare songs and set lists in one place, and singers read
                     lyrics and chords on their phones, even offline.
                     [Placeholder: refine this hero paragraph.]
                 </p>
@@ -68,7 +68,7 @@
                     </a>
                 </div>
                 <p class="mt-4 text-sm text-ink/50">
-                    Choir leader?
+                    Choir manager?
                     <a href="{{ url('/admin/login') }}" class="font-semibold text-accent-dark underline underline-offset-4 hover:text-accent">Sign in to the admin panel</a>
                 </p>
             </div>
@@ -118,10 +118,10 @@
                 $features = [
                     ['title' => 'Lyrics & chords', 'body' => 'Chords sit right above the words they belong to, rendered cleanly from ChordPro.', 'icon' => 'M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z'],
                     ['title' => 'Works offline', 'body' => 'Sync once, then read songs and sets anywhere, even without a signal in the sanctuary.', 'icon' => 'M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.780 1.400A4.002 4.002 0 003 15z'],
-                    ['title' => 'Set lists', 'body' => 'Songs in order for a specific date and time, with notes from the leader at the top.', 'icon' => 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'],
+                    ['title' => 'Set lists', 'body' => 'Songs in order for a specific date and time, with notes from the manager at the top.', 'icon' => 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'],
                     ['title' => 'Key, capo & transpose', 'body' => 'Performance badges show the key, capo fret, and keyboard transpose at a glance.', 'icon' => 'M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z'],
                     ['title' => 'Readable your way', 'body' => 'Show or hide chords, pick a comfortable text size, and go full screen to read.', 'icon' => 'M4 7V5h16v2M9 19h6M12 5v14'],
-                    ['title' => 'Leader admin panel', 'body' => 'Leaders manage songs, set lists, and users from a simple web admin panel.', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
+                    ['title' => 'Manager admin panel', 'body' => 'Managers manage songs, set lists, and users from a simple web admin panel.', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
                 ];
             @endphp
 
@@ -147,7 +147,7 @@
                 </div>
                 <ol class="mt-14 grid gap-8 md:grid-cols-3">
                     @foreach ([
-                        ['Prepare', 'Leaders add songs in ChordPro and schedule set lists in the admin panel.'],
+                        ['Prepare', 'Managers add songs in ChordPro and schedule set lists in the admin panel.'],
                         ['Sync', 'Singers sign in and sync once. Songs and sets are saved on the phone.'],
                         ['Sing', 'Open the set, follow along with chords, and move through songs with one tap.'],
                     ] as $i => [$title, $body])
@@ -197,7 +197,7 @@
                         [Placeholder: second paragraph about your mission or values.]
                     </p>
                     <dl class="mt-8 grid grid-cols-3 gap-4 text-center">
-                        @foreach ([['[00]', 'Choirs'], ['[000]', 'Songs'], ['[00]', 'Leaders']] as [$value, $label])
+                        @foreach ([['[00]', 'Choirs'], ['[000]', 'Songs'], ['[00]', 'Managers']] as [$value, $label])
                             <div class="rounded-xl border border-accent/15 bg-white/70 p-4">
                                 <dt class="font-display text-2xl font-semibold text-accent-dark">{{ $value }}</dt>
                                 <dd class="mt-1 text-xs uppercase tracking-wider text-ink/50">{{ $label }}</dd>
@@ -267,7 +267,7 @@
                 <span class="text-[0.6rem] font-medium uppercase tracking-[0.18em] text-accent">Songs &amp; sets</span>
             </div>
             <p>&copy; {{ date('Y') }} Choird. All rights reserved.</p>
-            <a href="{{ url('/admin/login') }}" class="font-medium hover:text-accent">Leader login</a>
+            <a href="{{ url('/admin/login') }}" class="font-medium hover:text-accent">Manager login</a>
         </div>
     </footer>
 

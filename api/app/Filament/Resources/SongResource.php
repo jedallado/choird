@@ -57,7 +57,7 @@ class SongResource extends Resource
                     ->minValue(-11)
                     ->maxValue(11)
                     ->helperText('Semitones from chart key. +2 = up a whole step.'),
-                TextEntry::make('createdByUser.'.UserModelEnum::name())
+                TextEntry::make('createdByUser.'.UserModelEnum::fullName())
                     ->label('Created by')
                     ->placeholder('Unknown')
                     ->hiddenOn('create'),

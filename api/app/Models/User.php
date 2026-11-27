@@ -9,6 +9,7 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -26,7 +27,8 @@ class User extends Authenticatable implements FilamentUser
      * @var list<string>
      */
     protected $fillable = [
-        UserModelEnum::NAME->value,
+        UserModelEnum::FIRST_NAME->value,
+        UserModelEnum::LAST_NAME->value,
         UserModelEnum::EMAIL->value,
         UserModelEnum::PASSWORD->value,
         UserModelEnum::ROLE->value,
@@ -54,6 +56,34 @@ class User extends Authenticatable implements FilamentUser
             UserModelEnum::PASSWORD->value => 'hashed',
             UserModelEnum::ROLE->value => UserRole::class,
         ];
+    }
+
+    protected function firstName(): Attribute
+    {
+        return Attribute::set(fn (?string $value): ?string => $value === null ? null : trim($value));
+    }
+
+    protected function lastName(): Attribute
+    {
+        return Attribute::set(function (?string $value): ?string {
+            if ($value === null) {
+                return null;
+            }
+
+            $value = trim($value);
+
+            return $value === '' ? null : $value;
+        });
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $firstName = trim((string) $this->getAttribute(UserModelEnum::firstName()));
+            $lastName = trim((string) $this->getAttribute(UserModelEnum::lastName()));
+
+            return trim($firstName.' '.$lastName);
+        });
     }
 
     public function canAccessPanel(Panel $panel): bool
