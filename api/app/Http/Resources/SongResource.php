@@ -21,6 +21,7 @@ class SongResource extends JsonResource
             'capo' => $this->getAttribute(SongModelEnum::capo()),
             'keyboardTranspose' => $this->getAttribute(SongModelEnum::keyboardTranspose()),
             'content' => $this->getAttribute(SongModelEnum::content()),
+            'categories' => CategoryResource::collection($this->categories)->toArray($request),
             'createdAt' => $this->getAttribute(SongModelEnum::createdAt()),
             'updatedAt' => $this->getAttribute(SongModelEnum::updatedAt()),
         ];

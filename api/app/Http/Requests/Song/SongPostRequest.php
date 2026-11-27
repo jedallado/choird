@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Song;
 
+use App\Enums\Models\CategoryModelEnum;
 use App\Enums\Models\SongModelEnum;
 use App\Http\Requests\BaseFormRequest;
 use App\Models\User;
+use Illuminate\Validation\Rule;
 
 class SongPostRequest extends BaseFormRequest
 {
@@ -16,7 +18,7 @@ class SongPostRequest extends BaseFormRequest
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
@@ -27,6 +29,12 @@ class SongPostRequest extends BaseFormRequest
             SongModelEnum::capo() => 'nullable|integer|min:0|max:11',
             SongModelEnum::keyboardTranspose() => 'nullable|integer|min:-11|max:11',
             SongModelEnum::content() => 'required|string',
+            SongModelEnum::categoryIds() => 'sometimes|array',
+            SongModelEnum::categoryIds().'.*' => [
+                'integer',
+                'distinct',
+                Rule::exists(CategoryModelEnum::tableName(), 'id'),
+            ],
         ];
     }
 
@@ -46,6 +54,8 @@ class SongPostRequest extends BaseFormRequest
         return [
             SongModelEnum::title().'.required' => 'Title is required.',
             SongModelEnum::content().'.required' => 'Content is required.',
+            SongModelEnum::categoryIds().'.*.exists' => 'A selected category does not exist.',
+            SongModelEnum::categoryIds().'.*.distinct' => 'Each category can only be selected once.',
         ];
     }
 }

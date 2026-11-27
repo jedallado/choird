@@ -51,14 +51,32 @@ class SetSongs extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Songs, Sets, SetSongs])
+@DataClassName('CategoryEntry')
+class Categories extends Table {
+  IntColumn get id => integer()();
+  TextColumn get name => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('SongCategoryEntry')
+class SongCategories extends Table {
+  IntColumn get songId => integer()();
+  IntColumn get categoryId => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {songId, categoryId};
+}
+
+@DriftDatabase(tables: [Songs, Sets, SetSongs, Categories, SongCategories])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -69,6 +87,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(sets);
         await m.createTable(setSongs);
+      }
+      if (from < 3) {
+        await m.createTable(categories);
+        await m.createTable(songCategories);
       }
     },
   );

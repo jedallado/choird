@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
 import '../models/song.dart';
+import '../models/song_category.dart';
 
 class SongLocalStore {
   SongLocalStore(this._database);
@@ -12,8 +13,11 @@ class SongLocalStore {
     final rows = await (_database.select(
       _database.songs,
     )..orderBy([(t) => OrderingTerm.asc(t.title)])).get();
+    final categories = await _categoriesBySongId();
 
-    return rows.map(_songFromRow).toList();
+    return rows
+        .map((row) => _songFromRow(row, categories[row.id] ?? const []))
+        .toList();
   }
 
   Future<Song?> getSongById(int id) async {
@@ -21,19 +25,16 @@ class SongLocalStore {
       _database.songs,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
 
-    return row == null ? null : _songFromRow(row);
+    if (row == null) {
+      return null;
+    }
+
+    final categories = await _categoriesBySongId(songId: id);
+    return _songFromRow(row, categories[id] ?? const []);
   }
 
   Future<void> replaceAll(List<Song> songs) async {
-    await _database.transaction(() async {
-      await _database.delete(_database.songs).go();
-      await _database.batch((batch) {
-        batch.insertAll(
-          _database.songs,
-          songs.map(_companionFromSong).toList(),
-        );
-      });
-    });
+    await _saveSongs(songs, replaceCatalog: true);
   }
 
   /// Inserts or updates the given songs without touching the rest of the
@@ -44,16 +45,122 @@ class SongLocalStore {
       return;
     }
 
-    await _database.batch((batch) {
-      batch.insertAll(
-        _database.songs,
-        songs.map(_companionFromSong).toList(),
-        mode: InsertMode.insertOrReplace,
-      );
+    await _saveSongs(songs, replaceCatalog: false);
+  }
+
+  Future<void> _saveSongs(
+    List<Song> songs, {
+    required bool replaceCatalog,
+  }) async {
+    await _database.transaction(() async {
+      if (replaceCatalog) {
+        await _database.delete(_database.songCategories).go();
+        await _database.delete(_database.categories).go();
+        await _database.delete(_database.songs).go();
+      } else {
+        final songIds = songs.map((song) => song.id).toList();
+        await (_database.delete(
+          _database.songCategories,
+        )..where((table) => table.songId.isIn(songIds))).go();
+      }
+
+      if (songs.isEmpty) {
+        return;
+      }
+
+      await _database.batch((batch) {
+        batch.insertAll(
+          _database.songs,
+          songs.map(_companionFromSong).toList(),
+          mode: InsertMode.insertOrReplace,
+        );
+      });
+
+      final categoriesById = <int, SongCategory>{};
+      for (final song in songs) {
+        for (final category in song.categories) {
+          categoriesById[category.id] = category;
+        }
+      }
+
+      if (categoriesById.isNotEmpty) {
+        await _database.batch((batch) {
+          batch.insertAll(
+            _database.categories,
+            categoriesById.values.map(_companionFromCategory).toList(),
+            mode: InsertMode.insertOrReplace,
+          );
+        });
+      }
+
+      final links = [
+        for (final song in songs)
+          for (final category in song.categories)
+            SongCategoriesCompanion.insert(
+              songId: song.id,
+              categoryId: category.id,
+            ),
+      ];
+
+      if (links.isNotEmpty) {
+        await _database.batch((batch) {
+          batch.insertAll(
+            _database.songCategories,
+            links,
+            mode: InsertMode.insertOrReplace,
+          );
+        });
+      }
+
+      await _deleteUnreferencedCategories();
     });
   }
 
-  Song _songFromRow(SongEntry row) {
+  Future<void> _deleteUnreferencedCategories() async {
+    final referenced = await _database.select(_database.songCategories).get();
+    final ids = referenced.map((row) => row.categoryId).toSet();
+
+    if (ids.isEmpty) {
+      await _database.delete(_database.categories).go();
+      return;
+    }
+
+    await (_database.delete(
+      _database.categories,
+    )..where((table) => table.id.isNotIn(ids))).go();
+  }
+
+  Future<Map<int, List<SongCategory>>> _categoriesBySongId({
+    int? songId,
+  }) async {
+    final query = _database.select(_database.songCategories).join([
+      innerJoin(
+        _database.categories,
+        _database.categories.id.equalsExp(_database.songCategories.categoryId),
+      ),
+    ]);
+
+    if (songId != null) {
+      query.where(_database.songCategories.songId.equals(songId));
+    }
+
+    query.orderBy([OrderingTerm.asc(_database.categories.name)]);
+
+    final rows = await query.get();
+    final categories = <int, List<SongCategory>>{};
+
+    for (final row in rows) {
+      final link = row.readTable(_database.songCategories);
+      final category = row.readTable(_database.categories);
+      categories
+          .putIfAbsent(link.songId, () => [])
+          .add(SongCategory(id: category.id, name: category.name));
+    }
+
+    return categories;
+  }
+
+  Song _songFromRow(SongEntry row, List<SongCategory> categories) {
     return Song(
       id: row.id,
       title: row.title,
@@ -62,6 +169,7 @@ class SongLocalStore {
       capo: row.capo,
       keyboardTranspose: row.keyboardTranspose,
       content: row.content,
+      categories: categories,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     );
@@ -78,6 +186,13 @@ class SongLocalStore {
       content: Value(song.content),
       createdAt: Value(song.createdAt),
       updatedAt: Value(song.updatedAt),
+    );
+  }
+
+  CategoriesCompanion _companionFromCategory(SongCategory category) {
+    return CategoriesCompanion(
+      id: Value(category.id),
+      name: Value(category.name),
     );
   }
 }

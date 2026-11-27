@@ -229,6 +229,17 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             ),
             const SizedBox(height: 8),
           ],
+          if (song.categories.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final category in song.categories)
+                  Chip(label: Text(category.name)),
+              ],
+            ),
+            SizedBox(height: _hasPerformanceBadges(song) ? 8 : 16),
+          ],
           if (_hasPerformanceBadges(song)) ...[
             Wrap(
               spacing: 8,

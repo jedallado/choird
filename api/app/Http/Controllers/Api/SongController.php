@@ -20,7 +20,7 @@ class SongController extends Controller
     public function index(): AnonymousResourceCollection
     {
         return SongResource::collection(
-            Song::query()->orderBy(SongModelEnum::title())->get()
+            Song::query()->with('categories')->orderBy(SongModelEnum::title())->get()
         );
     }
 
@@ -36,7 +36,7 @@ class SongController extends Controller
 
     public function show(Song $song): SongResource
     {
-        return new SongResource($song);
+        return new SongResource($song->load('categories'));
     }
 
     public function update(SongPutRequest $request, Song $song, UpdateSong $updateSong): SongResource

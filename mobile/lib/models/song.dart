@@ -1,3 +1,5 @@
+import 'song_category.dart';
+
 class Song {
   const Song({
     required this.id,
@@ -7,6 +9,7 @@ class Song {
     this.capo,
     this.keyboardTranspose,
     required this.content,
+    this.categories = const [],
     required this.createdAt,
     required this.updatedAt,
   });
@@ -18,6 +21,7 @@ class Song {
   final int? capo;
   final int? keyboardTranspose;
   final String content;
+  final List<SongCategory> categories;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -30,6 +34,7 @@ class Song {
       capo: json['capo'] as int?,
       keyboardTranspose: json['keyboardTranspose'] as int?,
       content: json['content'] as String,
+      categories: SongCategory.listFromJson(json['categories']),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

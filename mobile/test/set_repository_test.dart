@@ -74,6 +74,9 @@ void main() {
     "capo": 0,
     "keyboardTranspose": 0,
     "content": "[G]Amazing grace",
+    "categories": [
+      {"id": 3, "name": "Hymns"}
+    ],
     "createdAt": "2026-01-01T00:00:00.000000Z",
     "updatedAt": "2026-01-02T00:00:00.000000Z"
   }
@@ -113,6 +116,7 @@ void main() {
     final cachedSong = await SongLocalStore(database).getSongById(5);
     expect(cachedSong, isNotNull);
     expect(cachedSong!.content, '[G]Amazing grace');
+    expect(cachedSong.categories.map((category) => category.name), ['Hymns']);
 
     expect(await repository.getLastSyncedAt(), isNotNull);
   });

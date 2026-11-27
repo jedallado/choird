@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/song.dart';
+import '../../models/song_category.dart';
 import '../../services/song_repository.dart';
 import 'song_detail_screen.dart';
 
@@ -22,6 +23,7 @@ class _SongListScreenState extends State<SongListScreen> {
   List<Song> _songs = [];
   DateTime? _lastSyncedAt;
   String _searchQuery = '';
+  int? _selectedCategoryId;
   bool _isLoading = true;
   bool _isSyncing = false;
   String? _loadError;
@@ -52,8 +54,7 @@ class _SongListScreenState extends State<SongListScreen> {
       }
 
       setState(() {
-        _songs = songs;
-        _lastSyncedAt = lastSyncedAt;
+        _rememberSongs(songs, lastSyncedAt);
         _isLoading = false;
       });
     } catch (error) {
@@ -85,8 +86,7 @@ class _SongListScreenState extends State<SongListScreen> {
       }
 
       setState(() {
-        _songs = songs;
-        _lastSyncedAt = lastSyncedAt;
+        _rememberSongs(songs, lastSyncedAt);
         _loadError = null;
         _isSyncing = false;
       });
@@ -116,18 +116,72 @@ class _SongListScreenState extends State<SongListScreen> {
     }
   }
 
-  List<Song> _filterSongs(List<Song> songs) {
-    final query = _searchQuery.trim().toLowerCase();
-    if (query.isEmpty) {
-      return songs;
+  void _rememberSongs(List<Song> songs, DateTime? lastSyncedAt) {
+    final categoryIds = {
+      for (final song in songs)
+        for (final category in song.categories) category.id,
+    };
+
+    _songs = songs;
+    _lastSyncedAt = lastSyncedAt;
+    if (_selectedCategoryId != null &&
+        !categoryIds.contains(_selectedCategoryId)) {
+      _selectedCategoryId = null;
+    }
+  }
+
+  List<SongCategory> _availableCategories() {
+    final categoriesById = <int, SongCategory>{};
+    for (final song in _songs) {
+      for (final category in song.categories) {
+        categoriesById[category.id] = category;
+      }
     }
 
+    final categories = categoriesById.values.toList()
+      ..sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
+
+    return categories;
+  }
+
+  List<Song> _filterSongs(List<Song> songs) {
+    final query = _searchQuery.trim().toLowerCase();
+
     return songs.where((song) {
+      final matchesCategory =
+          _selectedCategoryId == null ||
+          song.categories.any(
+            (category) => category.id == _selectedCategoryId,
+          );
+      if (!matchesCategory) {
+        return false;
+      }
+
+      if (query.isEmpty) {
+        return true;
+      }
+
       final titleMatches = song.title.toLowerCase().contains(query);
       final artistMatches =
           song.artist?.toLowerCase().contains(query) ?? false;
       return titleMatches || artistMatches;
     }).toList();
+  }
+
+  String _emptyFilterMessage() {
+    final hasQuery = _searchQuery.trim().isNotEmpty;
+    final hasCategory = _selectedCategoryId != null;
+
+    if (hasQuery && hasCategory) {
+      return 'No songs match your search in this category.';
+    }
+    if (hasCategory) {
+      return 'No songs in this category.';
+    }
+
+    return 'No songs match your search.';
   }
 
   void _openSongDetail(Song song) {
@@ -222,7 +276,7 @@ class _SongListScreenState extends State<SongListScreen> {
         children: [
           SizedBox(
             height: MediaQuery.sizeOf(context).height * 0.6,
-            child: const Center(child: Text('No songs match your search.')),
+            child: Center(child: Text(_emptyFilterMessage())),
           ),
         ],
       );
@@ -296,31 +350,73 @@ class _SongListScreenState extends State<SongListScreen> {
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search songs',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = '';
-                          });
-                        },
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search songs',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isEmpty
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            ),
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    textInputAction: TextInputAction.search,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: DropdownButtonFormField<int?>(
+                    key: const Key('song-category-filter'),
+                    initialValue: _selectedCategoryId,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: [
+                      const DropdownMenuItem<int?>(
+                        value: null,
+                        child: Text(
+                          'All Categories',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                border: const OutlineInputBorder(),
-                isDense: true,
-              ),
-              textInputAction: TextInputAction.search,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
+                      for (final category in _availableCategories())
+                        DropdownMenuItem<int?>(
+                          value: category.id,
+                          child: Text(
+                            category.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                    onChanged: (categoryId) {
+                      setState(() {
+                        _selectedCategoryId = categoryId;
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(

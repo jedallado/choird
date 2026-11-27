@@ -12,7 +12,9 @@ enum SongModelEnum: string
     case KEYBOARD_TRANSPOSE = 'keyboard_transpose';
     case CONTENT = 'content';
     case CREATED_BY_USER_ID = 'created_by_user_id';
+    case CATEGORY_IDS = 'category_ids';
     case CLIENT_KEYBOARD_TRANSPOSE = 'keyboardTranspose';
+    case CLIENT_CATEGORY_IDS = 'categoryIds';
     case CREATED_AT = 'created_at';
     case UPDATED_AT = 'updated_at';
     case CLIENT_CREATED_AT = 'createdAt';
@@ -58,6 +60,11 @@ enum SongModelEnum: string
         return self::CREATED_BY_USER_ID->value;
     }
 
+    public static function categoryIds(): string
+    {
+        return self::CATEGORY_IDS->value;
+    }
+
     public static function createdAt(): string
     {
         return self::CREATED_AT->value;
@@ -91,6 +98,7 @@ enum SongModelEnum: string
     {
         return [
             self::CLIENT_KEYBOARD_TRANSPOSE->value => self::keyboardTranspose(),
+            self::CLIENT_CATEGORY_IDS->value => self::categoryIds(),
         ];
     }
 }

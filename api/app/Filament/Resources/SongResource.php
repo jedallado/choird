@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Models\CategoryModelEnum;
 use App\Enums\Models\SongModelEnum;
 use App\Enums\Models\UserModelEnum;
 use App\Filament\Resources\SongResource\Pages\CreateSong;
@@ -13,6 +14,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
@@ -59,6 +61,16 @@ class SongResource extends Resource
                     ->label('Created by')
                     ->placeholder('Unknown')
                     ->hiddenOn('create'),
+                Select::make('categories')
+                    ->label('Categories')
+                    ->relationship(
+                        name: 'categories',
+                        titleAttribute: CategoryModelEnum::name(),
+                    )
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->columnSpanFull(),
                 Textarea::make(SongModelEnum::content())
                     ->required()
                     ->rows(20)
@@ -86,6 +98,9 @@ class SongResource extends Resource
                 TextColumn::make(SongModelEnum::keyboardTranspose())
                     ->label('Keyboard')
                     ->sortable(),
+                TextColumn::make('categories.'.CategoryModelEnum::name())
+                    ->label('Categories')
+                    ->badge(),
                 TextColumn::make(SongModelEnum::updatedAt())
                     ->label('Updated')
                     ->dateTime()
